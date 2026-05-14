@@ -58,8 +58,8 @@ body {
   gap: 10px;
   padding: 0 16px;
   height: 52px;
-  background: var(--ink);
-  color: var(--paper);
+  background: #1c1b18;
+  color: #e8e6e0;
   flex-shrink: 0;
   z-index: 10;
 }
@@ -68,7 +68,7 @@ body {
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--paper);
+  color: #e8e6e0;
   margin-right: auto;
   display: flex;
   align-items: center;
@@ -82,7 +82,7 @@ body {
   border-radius: var(--radius);
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.08);
-  color: var(--paper);
+  color: #e8e6e0;
   font-family: var(--font-sans);
   font-size: 13px;
   cursor: pointer;
@@ -145,13 +145,16 @@ body {
   overflow: hidden;
 }
 .panel-header {
-  padding: 10px 14px 8px;
+  padding: 8px 10px 8px 14px;
   font-size: 11px;
   font-weight: 500;
   color: var(--ink-3);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--paper-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 #item-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 .item-row {
@@ -501,6 +504,18 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 13px; color: var(--ink-3); }
 
+
+/* ── Version tag ─────────────────────────────────────── */
+#version-tag {
+  padding: 6px 14px;
+  font-size: 10px;
+  color: var(--ink-4);
+  letter-spacing: 0.04em;
+  border-top: 1px solid var(--paper-3);
+  flex-shrink: 0;
+  user-select: none;
+}
+
 /* ── Dark Mode ───────────────────────────────────────── */
 body.dark {
   --ink:        #e8e6e0;
@@ -520,7 +535,7 @@ body.dark {
   --shadow:     0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
   --shadow-md:  0 4px 16px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
 }
-body.dark #topbar { background: #111110; }
+body.dark #topbar { background: #0f0e0c; border-bottom: 1px solid #2a2926; }
 body.dark .modal  { background: var(--paper-2); }
 body.dark .lock-card { background: var(--paper-2); }
 body.dark .form-group input[type="text"],
@@ -568,9 +583,10 @@ body.dark #edit-image-zone.has-image { border-color: var(--paper-3); }
   <div id="item-panel">
     <div class="panel-header">
       <span>記事項目</span>
-      <button id="btn-add-item" onclick="createItemDirect()" title="新增記事項目" style="background:none;border:none;cursor:pointer;color:var(--ink-3);line-height:1;padding:0 2px;font-size:20px;font-weight:300;display:flex;align-items:center;transition:color 0.18s ease;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-3)'">&#xff0b;</button>
+      <button id="btn-add-item" onclick="createItemDirect()" title="新增記事項目" style="background:none;border:none;cursor:pointer;color:var(--ink-3);line-height:1;padding:2px 4px;font-size:22px;font-weight:300;display:flex;align-items:center;transition:color 0.18s ease;flex-shrink:0;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-3)'">+</button>
     </div>
     <div id="item-list"></div>
+    <div id="version-tag">v26.05.01</div>
   </div>
 
   <!-- Content Area (right) -->
