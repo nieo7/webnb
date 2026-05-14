@@ -603,10 +603,6 @@ body {
   <div class="modal">
     <h3>⚙ 設定</h3>
     <div class="form-group">
-      <label>App Script Web App URL</label>
-      <input type="url" id="cfg-api-url" placeholder="https://script.google.com/macros/s/…/exec">
-    </div>
-    <div class="form-group">
       <label>主試算表 ID</label>
       <input type="text" id="cfg-sheet-id" placeholder="Google 試算表 ID">
     </div>
@@ -731,7 +727,7 @@ body {
 <script>
 // ── State ───────────────────────────────────────────────────
 const S = {
-  apiUrl        : localStorage.getItem('apiUrl') || '',
+  apiUrl        : 'https://script.google.com/macros/s/AKfycbwPToRzEYSwY6ppOzOueI2CkKw6N2buDHMknXc7vOLnVA7llKn0xY10ni9ULi15OSHe/exec',
   notebooks     : [],
   currentNb     : null,
   items         : [],
@@ -744,7 +740,7 @@ const S = {
 
 // ── API ─────────────────────────────────────────────────────
 async function api(action, payload = {}) {
-  if (!S.apiUrl) { showToast('請先在設定中填入 Web App URL', true); throw new Error('no-api-url'); }
+
   const res = await fetch(S.apiUrl, { method: 'POST', body: JSON.stringify({ action, payload }) });
   const data = await res.json();
   if (!data.success) throw new Error(data.error || '操作失敗');
@@ -753,7 +749,7 @@ async function api(action, payload = {}) {
 
 // ── Init ────────────────────────────────────────────────────
 async function init() {
-  if (!S.apiUrl) { hideLoading(); showSettingsModal(); return; }
+
   try { await loadNotebooks(); } catch(e) { showToast('無法連線，請確認設定', true); }
   hideLoading();
 }
@@ -1156,21 +1152,14 @@ function confirmDeleteItem() {
 
 // ── Settings ─────────────────────────────────────────────────
 function showSettingsModal() {
-  document.getElementById('cfg-api-url').value  = S.apiUrl;
   document.getElementById('cfg-sheet-id').value = '';
   document.getElementById('cfg-password').value = '';
   openModal('modal-settings');
-  if (S.apiUrl) {
-    api('getConfig').then(d => { document.getElementById('cfg-sheet-id').value = d.mainSpreadsheetId || ''; }).catch(()=>{});
-  }
+  api('getConfig').then(d => { document.getElementById('cfg-sheet-id').value = d.mainSpreadsheetId || ''; }).catch(()=>{});
 }
 async function saveSettings() {
-  const apiUrl   = document.getElementById('cfg-api-url').value.trim();
   const sheetId  = document.getElementById('cfg-sheet-id').value.trim();
   const password = document.getElementById('cfg-password').value;
-  if (!apiUrl) { showToast('請填入 Web App URL', true); return; }
-  S.apiUrl = apiUrl;
-  localStorage.setItem('apiUrl', apiUrl);
   try {
     await api('saveConfig', { mainSpreadsheetId: sheetId, password: password || undefined });
     closeModal('modal-settings');
