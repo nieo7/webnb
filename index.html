@@ -28,7 +28,7 @@
   --radius:     6px;
   --radius-lg:  10px;
   --shadow:     0 1px 3px rgba(26,26,24,0.08), 0 1px 2px rgba(26,26,24,0.04);
-  --shadow-md:  0 4px 12px rgba(26,26,24,0.10), 0 2px 4px rgba(26,26,24,0.06);
+  --shadow-md:  0 4px 16px rgba(26,26,24,0.13), 0 2px 4px rgba(26,26,24,0.07);
   --transition: 0.18s ease;
   --font-serif: 'Noto Serif TC', serif;
   --font-sans:  'Noto Sans TC', sans-serif;
@@ -46,13 +46,12 @@ body {
   line-height: 1.6;
 }
 
-/* ── Scrollbar ─────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
 
-/* ── Top Bar ───────────────────────────────────────── */
+/* ── Top Bar ─────────────────────────────────────────── */
 #topbar {
   display: flex;
   align-items: center;
@@ -62,10 +61,8 @@ body {
   background: var(--ink);
   color: var(--paper);
   flex-shrink: 0;
-  position: relative;
   z-index: 10;
 }
-
 .app-title {
   font-family: var(--font-serif);
   font-size: 16px;
@@ -77,8 +74,6 @@ body {
   align-items: center;
   gap: 8px;
 }
-.app-title svg { opacity: 0.85; }
-
 .btn-topbar {
   display: inline-flex;
   align-items: center;
@@ -95,9 +90,8 @@ body {
   white-space: nowrap;
 }
 .btn-topbar:hover { background: rgba(255,255,255,0.16); }
-.btn-topbar svg { opacity: 0.8; }
 
-/* ── Notebook Tabs ─────────────────────────────────── */
+/* ── Notebook Tabs ───────────────────────────────────── */
 #tab-bar {
   display: flex;
   align-items: flex-end;
@@ -110,7 +104,6 @@ body {
   min-height: 42px;
 }
 #tab-bar::-webkit-scrollbar { height: 0; }
-
 .nb-tab {
   display: inline-flex;
   align-items: center;
@@ -125,7 +118,6 @@ body {
   transition: color var(--transition), background var(--transition);
   user-select: none;
   margin-top: 6px;
-  position: relative;
 }
 .nb-tab:hover { color: var(--ink-2); background: var(--paper-3); }
 .nb-tab.active {
@@ -139,14 +131,10 @@ body {
 .nb-tab.dragging { opacity: 0.4; }
 .nb-tab.drag-over { border-left: 2px solid var(--accent); }
 
-/* ── Main Layout ───────────────────────────────────── */
-#main {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
+/* ── Main Layout ─────────────────────────────────────── */
+#main { display: flex; flex: 1; overflow: hidden; }
 
-/* ── Item List (left panel) ────────────────────────── */
+/* ── Item List ───────────────────────────────────────── */
 #item-panel {
   width: 210px;
   flex-shrink: 0;
@@ -156,7 +144,6 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
-
 .panel-header {
   padding: 10px 14px 8px;
   font-size: 11px;
@@ -165,17 +152,8 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--paper-3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
-
-#item-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 4px 0;
-}
-
+#item-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 .item-row {
   display: flex;
   align-items: center;
@@ -197,23 +175,12 @@ body {
 }
 .item-row.dragging { opacity: 0.35; }
 .item-row.drag-over { border-top: 2px solid var(--accent); }
-
-.item-grip {
-  color: var(--ink-4);
-  flex-shrink: 0;
-  cursor: grab;
-  display: flex;
-}
+.item-grip { color: var(--ink-4); flex-shrink: 0; cursor: grab; display: flex; }
 .item-grip:active { cursor: grabbing; }
 .item-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.item-img-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--accent-2);
-  flex-shrink: 0;
-}
+.item-img-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-2); flex-shrink: 0; }
 
-/* ── Content Area (right) ──────────────────────────── */
+/* ── Content Area (right) ────────────────────────────── */
 #content-area {
   flex: 1;
   display: flex;
@@ -222,30 +189,120 @@ body {
   background: var(--paper);
 }
 
-#content-header {
-  padding: 12px 20px 10px;
+/* ── View Mode (read-only) ───────────────────────────── */
+#view-mode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#view-header {
+  padding: 14px 24px 12px;
   border-bottom: 1px solid var(--paper-3);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
-
-#content-title {
+#view-title {
   font-family: var(--font-serif);
-  font-size: 17px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--ink);
-  border: none;
-  background: transparent;
-  outline: none;
   flex: 1;
   min-width: 0;
-  padding: 2px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-#content-title:focus { border-bottom: 1px solid var(--accent); }
-#content-title::placeholder { color: var(--ink-4); }
+#view-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
+/* 圖片顯示：原尺寸，最大寬度 520px */
+#view-image-wrap {
+  display: none;
+}
+#view-image-wrap.visible {
+  display: block;
+}
+#view-img {
+  display: block;
+  max-width: 520px;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+#view-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#view-text.empty { color: var(--ink-4); font-style: italic; }
+
+/* ── Empty / Lock screens ────────────────────────────── */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--ink-4);
+  padding: 24px;
+  text-align: center;
+}
+.empty-state svg { opacity: 0.35; }
+.empty-state p { font-size: 13px; }
+
+#lock-screen {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+}
+#lock-screen.visible { display: flex; }
+.lock-card {
+  background: #fff;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.lock-card h3 { font-family: var(--font-serif); font-size: 17px; margin-bottom: 6px; color: var(--ink); }
+.lock-card p  { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+.lock-card input {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color var(--transition);
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+.lock-card input:focus { border-color: var(--accent-2); }
+.lock-card .btn-sm { width: 100%; justify-content: center; padding: 9px; font-size: 14px; }
+
+/* ── Buttons ─────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -257,7 +314,6 @@ body {
   white-space: nowrap;
 }
 .badge-enc  { background: var(--warn-bg);   color: var(--warn); }
-.badge-open { background: var(--accent-bg); color: var(--accent); }
 
 .btn-sm {
   display: inline-flex;
@@ -278,103 +334,24 @@ body {
 .btn-sm.danger:hover { background: var(--danger-bg); border-color: var(--danger); }
 .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn-sm.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
-
-#content-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 16px 20px 0;
-  gap: 12px;
-}
-
-#content-textarea {
-  flex: 1;
-  resize: none;
-  border: 1px solid var(--paper-3);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
   font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--ink);
-  background: #fff;
-  outline: none;
-  transition: border-color var(--transition);
-}
-#content-textarea:focus { border-color: var(--accent-2); }
-#content-textarea::placeholder { color: var(--ink-4); }
-
-/* ── Image Zone ─────────────────────────────────────── */
-#image-zone {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border: 1px dashed var(--ink-4);
-  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: border-color var(--transition), background var(--transition);
-  flex-shrink: 0;
+  transition: all var(--transition);
 }
-#image-zone:hover { border-color: var(--accent-2); background: var(--accent-bg); }
-#image-zone.has-image { border-style: solid; border-color: var(--paper-3); cursor: default; }
+.btn-edit:hover { background: var(--accent); color: #fff; }
 
-#img-preview {
-  width: 60px; height: 60px;
-  border-radius: var(--radius);
-  object-fit: cover;
-  display: none;
-  flex-shrink: 0;
-}
-#img-preview.visible { display: block; }
-
-.img-placeholder {
-  width: 60px; height: 60px;
-  border-radius: var(--radius);
-  background: var(--paper-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--ink-3);
-}
-.img-placeholder.hidden { display: none; }
-
-.img-info { flex: 1; }
-.img-info p { font-size: 13px; color: var(--ink-2); }
-.img-info small { font-size: 11px; color: var(--ink-3); }
-
-#img-file-input { display: none; }
-
-/* ── Content Footer ────────────────────────────────── */
-#content-footer {
-  padding: 10px 20px;
-  border-top: 1px solid var(--paper-3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-.footer-meta { font-size: 11px; color: var(--ink-3); }
-.footer-actions { display: flex; gap: 8px; }
-
-/* ── Empty States ──────────────────────────────────── */
-.empty-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--ink-4);
-  padding: 24px;
-  text-align: center;
-}
-.empty-state svg { opacity: 0.4; }
-.empty-state p { font-size: 13px; }
-
-/* ── Modal ─────────────────────────────────────────── */
+/* ── Modal (general) ─────────────────────────────────── */
 .modal-backdrop {
   position: fixed; inset: 0;
   background: rgba(26,26,24,0.45);
@@ -387,37 +364,21 @@ body {
   transition: opacity 0.2s ease;
 }
 .modal-backdrop.open { opacity: 1; pointer-events: all; }
-
 .modal {
   background: var(--paper);
   border-radius: var(--radius-lg);
   padding: 24px 28px;
   min-width: 340px;
-  max-width: 460px;
+  max-width: 480px;
   width: 90%;
   box-shadow: var(--shadow-md);
   transform: translateY(8px);
   transition: transform 0.2s ease;
 }
 .modal-backdrop.open .modal { transform: translateY(0); }
-
-.modal h3 {
-  font-family: var(--font-serif);
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: var(--ink);
-}
-
+.modal h3 { font-family: var(--font-serif); font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--ink); }
 .form-group { margin-bottom: 14px; }
-.form-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink-3);
-  margin-bottom: 5px;
-  letter-spacing: 0.04em;
-}
+.form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-bottom: 5px; letter-spacing: 0.04em; }
 .form-group input[type="text"],
 .form-group input[type="password"],
 .form-group input[type="url"] {
@@ -434,40 +395,81 @@ body {
 }
 .form-group input:focus { border-color: var(--accent-2); }
 .form-group input::placeholder { color: var(--ink-4); }
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
 .toggle-label { font-size: 13px; color: var(--ink-2); }
-.toggle {
-  position: relative; width: 38px; height: 22px;
-}
+.toggle { position: relative; width: 38px; height: 22px; }
 .toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute; inset: 0;
-  background: var(--ink-4);
-  border-radius: 99px;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  width: 16px; height: 16px;
-  left: 3px; top: 3px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform var(--transition);
-}
+.toggle-slider { position: absolute; inset: 0; background: var(--ink-4); border-radius: 99px; cursor: pointer; transition: background var(--transition); }
+.toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform var(--transition); }
 .toggle input:checked + .toggle-slider { background: var(--accent); }
 .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
-
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
 
-/* ── Toast ─────────────────────────────────────────── */
+/* ── Edit Modal (large, tall) ────────────────────────── */
+#modal-edit .modal {
+  max-width: 680px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.edit-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+#edit-textarea {
+  resize: none;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  transition: border-color var(--transition);
+  min-height: 260px;
+  flex: 1;
+}
+#edit-textarea:focus { border-color: var(--accent-2); }
+#edit-textarea::placeholder { color: var(--ink-4); }
+
+/* image zone in edit modal */
+#edit-image-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--ink-4);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  flex-shrink: 0;
+}
+#edit-image-zone:hover { border-color: var(--accent-2); background: var(--accent-bg); }
+#edit-image-zone.has-image { border-style: solid; border-color: var(--paper-3); cursor: default; }
+#edit-img-preview { width: 60px; height: 60px; border-radius: var(--radius); object-fit: cover; display: none; flex-shrink: 0; }
+#edit-img-preview.visible { display: block; }
+.edit-img-placeholder {
+  width: 60px; height: 60px;
+  border-radius: var(--radius);
+  background: var(--paper-2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--ink-3);
+}
+.edit-img-placeholder.hidden { display: none; }
+.edit-img-info { flex: 1; }
+.edit-img-info p { font-size: 13px; color: var(--ink-2); }
+.edit-img-info small { font-size: 11px; color: var(--ink-3); }
+#edit-img-file-input { display: none; }
+
+/* ── Toast ───────────────────────────────────────────── */
 #toast {
   position: fixed;
   bottom: 24px; left: 50%;
@@ -486,108 +488,44 @@ body {
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 #toast.error { background: var(--danger); }
 
-/* ── Loading Overlay ───────────────────────────────── */
+/* ── Loading ─────────────────────────────────────────── */
 #loading {
   position: fixed; inset: 0;
   background: var(--paper);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  z-index: 300;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; z-index: 300;
   transition: opacity 0.3s ease;
 }
 #loading.hidden { opacity: 0; pointer-events: none; }
-.spinner {
-  width: 28px; height: 28px;
-  border: 2.5px solid var(--paper-3);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
+.spinner { width: 28px; height: 28px; border: 2.5px solid var(--paper-3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 13px; color: var(--ink-3); }
-
-/* ── Password Prompt ────────────────────────────────── */
-#lock-screen {
-  flex: 1;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 40px;
-}
-#lock-screen.visible { display: flex; }
-
-.lock-card {
-  background: #fff;
-  border: 1px solid var(--paper-3);
-  border-radius: var(--radius-lg);
-  padding: 32px 36px;
-  width: 100%;
-  max-width: 340px;
-  box-shadow: var(--shadow);
-  text-align: center;
-}
-.lock-card h3 {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  margin-bottom: 6px;
-  color: var(--ink);
-}
-.lock-card p { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
-.lock-card input {
-  width: 100%;
-  padding: 9px 14px;
-  border: 1px solid var(--paper-3);
-  border-radius: var(--radius);
-  font-size: 14px;
-  font-family: var(--font-sans);
-  outline: none;
-  margin-bottom: 12px;
-  transition: border-color var(--transition);
-  text-align: center;
-  letter-spacing: 0.1em;
-}
-.lock-card input:focus { border-color: var(--accent-2); }
-.lock-card .btn-sm { width: 100%; justify-content: center; padding: 9px; font-size: 14px; }
-
-/* ── Responsive ─────────────────────────────────────── */
-@media (max-width: 640px) {
-  #item-panel { width: 160px; }
-  #content-header { flex-wrap: wrap; }
-}
 </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div id="loading">
   <div class="spinner"></div>
   <p class="loading-text">載入中…</p>
 </div>
-
-<!-- Toast -->
 <div id="toast"></div>
 
 <!-- Top Bar -->
 <div id="topbar">
   <div class="app-title">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/></svg>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/></svg>
     我的記事本
   </div>
   <button class="btn-topbar" onclick="showNewNotebookModal()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     新記事本
   </button>
   <button class="btn-topbar" onclick="showNewItemModal()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     新記事項目
   </button>
   <button class="btn-topbar" onclick="showSettingsModal()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     設定
   </button>
 </div>
@@ -597,20 +535,20 @@ body {
 
 <!-- Main -->
 <div id="main">
-  <!-- Item List -->
+
+  <!-- Item List (left) -->
   <div id="item-panel">
-    <div class="panel-header">
-      <span>記事項目</span>
-    </div>
+    <div class="panel-header">記事項目</div>
     <div id="item-list"></div>
   </div>
 
-  <!-- Content -->
+  <!-- Content Area (right) -->
   <div id="content-area">
-    <!-- Lock screen for encrypted notebooks -->
+
+    <!-- Lock screen -->
     <div id="lock-screen">
       <div class="lock-card">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:#8a6a1a;margin:0 auto 12px;display:block"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:#8a6a1a;margin:0 auto 12px;display:block"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <h3>加密的記事本</h3>
         <p>請輸入密碼以解鎖</p>
         <input type="password" id="lock-password" placeholder="輸入密碼…" onkeydown="if(event.key==='Enter') unlockCurrent()">
@@ -618,60 +556,47 @@ body {
       </div>
     </div>
 
-    <!-- Normal content view -->
-    <div id="content-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-      <div id="content-placeholder" class="empty-state">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <p>選擇左側記事項目開始編輯</p>
+    <!-- View Mode -->
+    <div id="view-mode">
+      <!-- Empty placeholder -->
+      <div id="view-placeholder" class="empty-state">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <p>選擇左側記事項目以檢視內容</p>
       </div>
 
-      <div id="content-editor" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-        <div id="content-header">
-          <input id="content-title" type="text" placeholder="記事項目名稱" onblur="saveItemTitle()">
-          <span id="enc-badge" class="badge" style="display:none"></span>
-          <button class="btn-sm" onclick="showRenameItemModal()">
+      <!-- View content (shown when item selected) -->
+      <div id="view-content" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div id="view-header">
+          <span id="view-title"></span>
+          <span id="view-enc-badge" class="badge badge-enc" style="display:none">🔒 加密</span>
+          <button class="btn-sm" onclick="showRenameItemModal()" title="改名">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             改名
           </button>
-          <button class="btn-sm danger" onclick="confirmDeleteItem()">
+          <button class="btn-sm danger" onclick="confirmDeleteItem()" title="刪除">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             刪除
           </button>
+          <button class="btn-edit" onclick="openEditModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            編輯
+          </button>
         </div>
-
-        <div id="content-body">
-          <textarea id="content-textarea" placeholder="開始輸入記事內容…"></textarea>
-
-          <div id="image-zone" onclick="handleImageZoneClick()">
-            <div class="img-placeholder" id="img-placeholder">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            </div>
-            <img id="img-preview" alt="附件圖片">
-            <div class="img-info">
-              <p id="img-zone-label">附加圖片（最多 1 張）</p>
-              <small id="img-zone-hint">點擊上傳圖片</small>
-            </div>
-            <div id="img-btn-area" style="margin-left:auto;display:flex;gap:6px;"></div>
+        <div id="view-body">
+          <!-- image: shown above text -->
+          <div id="view-image-wrap">
+            <img id="view-img" alt="附件圖片">
           </div>
-          <input type="file" id="img-file-input" accept="image/*" onchange="handleImageUpload(event)">
-        </div>
-
-        <div id="content-footer">
-          <span class="footer-meta" id="footer-meta">尚未儲存</span>
-          <div class="footer-actions">
-            <button class="btn-sm" onclick="discardChanges()">取消</button>
-            <button class="btn-sm primary" onclick="saveCurrentItem()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-              儲存
-            </button>
-          </div>
+          <!-- text content -->
+          <div id="view-text"></div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ── Modals ──────────────────────────────────────────── -->
+  </div><!-- end content-area -->
+</div><!-- end main -->
+
+<!-- ══════════════ MODALS ══════════════ -->
 
 <!-- Settings -->
 <div class="modal-backdrop" id="modal-settings">
@@ -706,10 +631,7 @@ body {
     </div>
     <div class="toggle-row">
       <span class="toggle-label">啟用加密</span>
-      <label class="toggle">
-        <input type="checkbox" id="new-nb-encrypted">
-        <span class="toggle-slider"></span>
-      </label>
+      <label class="toggle"><input type="checkbox" id="new-nb-encrypted"><span class="toggle-slider"></span></label>
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeModal('modal-new-notebook')">取消</button>
@@ -739,7 +661,7 @@ body {
     <h3>修改記事項目名稱</h3>
     <div class="form-group">
       <label>新名稱</label>
-      <input type="text" id="rename-item-name" placeholder="" onkeydown="if(event.key==='Enter') renameItem()">
+      <input type="text" id="rename-item-name" onkeydown="if(event.key==='Enter') renameItem()">
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeModal('modal-rename-item')">取消</button>
@@ -754,7 +676,7 @@ body {
     <h3>修改記事本名稱</h3>
     <div class="form-group">
       <label>新名稱</label>
-      <input type="text" id="rename-nb-name" placeholder="" onkeydown="if(event.key==='Enter') renameNotebook()">
+      <input type="text" id="rename-nb-name" onkeydown="if(event.key==='Enter') renameNotebook()">
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeModal('modal-rename-notebook')">取消</button>
@@ -775,63 +697,76 @@ body {
   </div>
 </div>
 
+<!-- ★ Edit Modal (large) -->
+<div class="modal-backdrop" id="modal-edit">
+  <div class="modal">
+    <h3 id="edit-modal-title">編輯記事</h3>
+    <div class="edit-modal-body">
+      <textarea id="edit-textarea" placeholder="開始輸入記事內容…"></textarea>
+      <!-- image zone -->
+      <div id="edit-image-zone" onclick="handleEditImageZoneClick()">
+        <div class="edit-img-placeholder" id="edit-img-placeholder">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <img id="edit-img-preview" alt="附件圖片">
+        <div class="edit-img-info">
+          <p id="edit-img-label">附加圖片（最多 1 張）</p>
+          <small id="edit-img-hint">點擊上傳圖片</small>
+        </div>
+        <div id="edit-img-btn-area" style="margin-left:auto;display:flex;gap:6px;"></div>
+      </div>
+      <input type="file" id="edit-img-file-input" accept="image/*" onchange="handleEditImageUpload(event)">
+    </div>
+    <div class="modal-actions" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--paper-3);">
+      <span id="edit-save-meta" style="font-size:11px;color:var(--ink-3);margin-right:auto;"></span>
+      <button class="btn-sm" onclick="discardEdit()">取消</button>
+      <button class="btn-sm primary" onclick="saveCurrentItem()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        儲存
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ── State ──────────────────────────────────────────────────
+// ── State ───────────────────────────────────────────────────
 const S = {
-  apiUrl        : localStorage.getItem('apiUrl')   || '',
+  apiUrl        : localStorage.getItem('apiUrl') || '',
   notebooks     : [],
-  currentNb     : null,   // { sheetId, name, encrypted }
+  currentNb     : null,
   items         : [],
-  currentItem   : null,   // { seq, name, encrypted, content, imageUrl, rowIndex }
-  sessionPwd    : '',     // 解鎖後保存在記憶體，不寫 localStorage
-  pendingImage  : null,   // { file, base64, mimeType, fileName }
+  currentItem   : null,
+  sessionPwd    : '',
+  pendingImage  : null,   // { base64, mimeType, fileName, previewUrl }
   currentImageUrl: '',
   currentFileId : '',
-  dirty         : false,
 };
 
-// ── API ────────────────────────────────────────────────────
+// ── API ─────────────────────────────────────────────────────
 async function api(action, payload = {}) {
   if (!S.apiUrl) { showToast('請先在設定中填入 Web App URL', true); throw new Error('no-api-url'); }
-  const res = await fetch(S.apiUrl, {
-    method : 'POST',
-    body   : JSON.stringify({ action, payload }),
-  });
+  const res = await fetch(S.apiUrl, { method: 'POST', body: JSON.stringify({ action, payload }) });
   const data = await res.json();
   if (!data.success) throw new Error(data.error || '操作失敗');
   return data;
 }
 
-// ── Init ───────────────────────────────────────────────────
+// ── Init ────────────────────────────────────────────────────
 async function init() {
-  if (!S.apiUrl) {
-    hideLoading();
-    showSettingsModal();
-    return;
-  }
-  try {
-    await loadNotebooks();
-  } catch (e) {
-    showToast('無法連線，請確認設定', true);
-  }
+  if (!S.apiUrl) { hideLoading(); showSettingsModal(); return; }
+  try { await loadNotebooks(); } catch(e) { showToast('無法連線，請確認設定', true); }
   hideLoading();
 }
+function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
 
-function hideLoading() {
-  document.getElementById('loading').classList.add('hidden');
-}
-
-// ── Notebooks ──────────────────────────────────────────────
+// ── Notebooks ────────────────────────────────────────────────
 async function loadNotebooks() {
   const data = await api('listNotebooks');
   S.notebooks = data.notebooks.sort((a, b) => a.index - b.index);
   renderTabs();
   if (S.notebooks.length > 0) {
-    if (!S.currentNb) selectNotebook(S.notebooks[0]);
-    else {
-      const still = S.notebooks.find(n => n.sheetId === S.currentNb.sheetId);
-      if (still) selectNotebook(still); else selectNotebook(S.notebooks[0]);
-    }
+    const still = S.currentNb && S.notebooks.find(n => n.sheetId === S.currentNb.sheetId);
+    selectNotebook(still || S.notebooks[0]);
   }
 }
 
@@ -844,12 +779,10 @@ function renderTabs() {
     tab.dataset.sheetId = nb.sheetId;
     tab.draggable = true;
     tab.innerHTML = nb.encrypted
-      ? `<svg class="lock-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>${nb.name}`
-      : nb.name;
+      ? `<svg class="lock-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>${escHtml(nb.name)}`
+      : escHtml(nb.name);
     tab.onclick = () => selectNotebook(nb);
-    tab.oncontextmenu = (e) => { e.preventDefault(); showNotebookMenu(nb, e); };
-
-    // drag-to-reorder tabs
+    tab.oncontextmenu = (e) => { e.preventDefault(); showNotebookCtxMenu(nb); };
     tab.ondragstart = (e) => { e.dataTransfer.setData('nbSheetId', nb.sheetId); tab.classList.add('dragging'); };
     tab.ondragend   = () => tab.classList.remove('dragging');
     tab.ondragover  = (e) => { e.preventDefault(); tab.classList.add('drag-over'); };
@@ -857,44 +790,39 @@ function renderTabs() {
     tab.ondrop      = async (e) => {
       e.preventDefault(); tab.classList.remove('drag-over');
       const fromId = parseInt(e.dataTransfer.getData('nbSheetId'));
-      const toId   = nb.sheetId;
-      if (fromId === toId) return;
+      if (fromId === nb.sheetId) return;
       const ids = S.notebooks.map(n => n.sheetId);
-      const fi = ids.indexOf(fromId), ti = ids.indexOf(toId);
+      const fi = ids.indexOf(fromId), ti = ids.indexOf(nb.sheetId);
       ids.splice(fi, 1); ids.splice(ti, 0, fromId);
       S.notebooks = ids.map(id => S.notebooks.find(n => n.sheetId === id));
       renderTabs();
       try { await api('reorderNotebooks', { orderedSheetIds: ids }); } catch(e) { showToast('排序儲存失敗', true); }
     };
-
     bar.appendChild(tab);
   });
 }
 
 async function selectNotebook(nb) {
   S.currentNb   = nb;
-  S.sessionPwd  = nb.encrypted ? S.sessionPwd : '';
   S.currentItem = null;
   renderTabs();
   renderItems([]);
+  showViewPlaceholder();
 
-  if (nb.encrypted && !S.sessionPwd) {
-    showLockScreen();
-    return;
-  }
+  if (nb.encrypted && !S.sessionPwd) { showLockScreen(); return; }
   hideLockScreen();
   await loadItems();
 }
 
 function showLockScreen() {
   document.getElementById('lock-screen').classList.add('visible');
-  document.getElementById('content-view').style.display = 'none';
+  document.getElementById('view-mode').style.display = 'none';
   document.getElementById('lock-password').value = '';
   setTimeout(() => document.getElementById('lock-password').focus(), 100);
 }
 function hideLockScreen() {
   document.getElementById('lock-screen').classList.remove('visible');
-  document.getElementById('content-view').style.display = 'flex';
+  document.getElementById('view-mode').style.display = 'flex';
 }
 
 async function unlockCurrent() {
@@ -905,17 +833,13 @@ async function unlockCurrent() {
     S.sessionPwd = pwd;
     hideLockScreen();
     await loadItems();
-  } catch(e) {
-    showToast('密碼錯誤', true);
-    document.getElementById('lock-password').select();
-  }
+  } catch(e) { showToast('密碼錯誤', true); document.getElementById('lock-password').select(); }
 }
 
-function showNotebookMenu(nb, e) {
-  // 簡單用 confirm/prompt 處理右鍵選單
+function showNotebookCtxMenu(nb) {
   const action = prompt(`記事本「${nb.name}」\n輸入操作：rename（改名）或 delete（刪除）`);
-  if (action === 'rename') { showRenameNotebookModal(nb); }
-  else if (action === 'delete') { confirmDeleteNotebook(nb); }
+  if (action === 'rename') showRenameNotebookModal(nb);
+  else if (action === 'delete') confirmDeleteNotebook(nb);
 }
 
 async function createNotebook() {
@@ -934,10 +858,9 @@ async function createNotebook() {
 
 function showRenameNotebookModal(nb) {
   document.getElementById('rename-nb-name').value = nb.name;
-  openModal('modal-rename-notebook');
   document.getElementById('rename-nb-name').dataset.sheetId = nb.sheetId;
+  openModal('modal-rename-notebook');
 }
-
 async function renameNotebook() {
   const input   = document.getElementById('rename-nb-name');
   const newName = input.value.trim();
@@ -966,13 +889,12 @@ function confirmDeleteNotebook(nb) {
   openModal('modal-confirm');
 }
 
-// ── Items ──────────────────────────────────────────────────
+// ── Items ────────────────────────────────────────────────────
 async function loadItems() {
   try {
     const data = await api('listItems', { sheetId: S.currentNb.sheetId });
     S.items = data.items.sort((a, b) => a.seq - b.seq);
     renderItems(S.items);
-    showPlaceholder();
   } catch(e) { showToast('載入記事項目失敗', true); }
 }
 
@@ -982,17 +904,15 @@ function renderItems(items) {
   items.forEach(item => {
     const row = document.createElement('div');
     row.className = 'item-row' + (S.currentItem?.rowIndex === item.rowIndex ? ' active' : '');
-    row.dataset.rowIndex = item.rowIndex;
     row.draggable = true;
     row.innerHTML = `
-      <span class="item-grip" aria-hidden="true">
+      <span class="item-grip">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
       </span>
       <span class="item-label">${escHtml(item.name)}</span>
       ${item.hasImage ? '<span class="item-img-dot"></span>' : ''}
     `;
     row.onclick = () => selectItem(item);
-
     row.ondragstart = (e) => { e.dataTransfer.setData('itemRowIndex', item.rowIndex); row.classList.add('dragging'); };
     row.ondragend   = () => row.classList.remove('dragging');
     row.ondragover  = (e) => { e.preventDefault(); row.classList.add('drag-over'); };
@@ -1000,93 +920,104 @@ function renderItems(items) {
     row.ondrop      = async (e) => {
       e.preventDefault(); row.classList.remove('drag-over');
       const fromIdx = parseInt(e.dataTransfer.getData('itemRowIndex'));
-      const toIdx   = item.rowIndex;
-      if (fromIdx === toIdx) return;
+      if (fromIdx === item.rowIndex) return;
       const idxs = S.items.map(i => i.rowIndex);
-      const fi = idxs.indexOf(fromIdx), ti = idxs.indexOf(toIdx);
+      const fi = idxs.indexOf(fromIdx), ti = idxs.indexOf(item.rowIndex);
       idxs.splice(fi, 1); idxs.splice(ti, 0, fromIdx);
       S.items = idxs.map(idx => S.items.find(i => i.rowIndex === idx));
       renderItems(S.items);
       try { await api('reorderItems', { sheetId: S.currentNb.sheetId, orderedRowIndexes: idxs }); }
       catch(e) { showToast('排序儲存失敗', true); }
     };
-
     list.appendChild(row);
   });
 }
 
 async function selectItem(item) {
-  if (S.dirty) { if (!confirm('有未儲存的變更，確定要離開？')) return; }
-  S.dirty = false;
   try {
     const data = await api('getItem', {
       sheetId  : S.currentNb.sheetId,
       rowIndex : item.rowIndex,
       password : S.sessionPwd || undefined,
     });
-    S.currentItem     = data;
-    S.currentImageUrl = data.imageUrl || '';
-    S.currentFileId   = '';
-    S.pendingImage    = null;
+    S.currentItem      = data;
+    S.currentImageUrl  = data.imageUrl || '';
+    S.currentFileId    = '';
+    S.pendingImage     = null;
     renderItems(S.items);
-    showEditor(data);
+    showViewContent(data);
   } catch(e) {
     if (e.message === 'NEED_PASSWORD' || e.message === 'WRONG_PASSWORD') {
-      showToast('需要密碼，請重新解鎖', true);
-      showLockScreen();
+      showToast('需要密碼，請重新解鎖', true); showLockScreen();
     } else showToast(e.message, true);
   }
 }
 
-function showPlaceholder() {
-  document.getElementById('content-placeholder').style.display = 'flex';
-  document.getElementById('content-editor').style.display      = 'none';
+// ── View Mode ────────────────────────────────────────────────
+function showViewPlaceholder() {
+  document.getElementById('view-placeholder').style.display = 'flex';
+  document.getElementById('view-content').style.display     = 'none';
 }
 
-function showEditor(item) {
-  document.getElementById('content-placeholder').style.display = 'none';
-  document.getElementById('content-editor').style.display      = 'flex';
+function showViewContent(item) {
+  document.getElementById('view-placeholder').style.display = 'none';
+  const vc = document.getElementById('view-content');
+  vc.style.display = 'flex';
 
-  document.getElementById('content-title').value = item.name;
+  // title
+  document.getElementById('view-title').textContent = item.name;
 
-  const badge = document.getElementById('enc-badge');
-  if (item.encrypted) {
-    badge.className   = 'badge badge-enc';
-    badge.textContent = '🔒 加密';
-    badge.style.display = '';
+  // enc badge
+  const badge = document.getElementById('view-enc-badge');
+  badge.style.display = item.encrypted ? '' : 'none';
+
+  // image: shown above text, max-width 520px (CSS handles it)
+  const imgWrap = document.getElementById('view-image-wrap');
+  const viewImg = document.getElementById('view-img');
+  if (item.imageUrl) {
+    viewImg.src = item.imageUrl;
+    imgWrap.classList.add('visible');
   } else {
-    badge.style.display = 'none';
+    viewImg.src = '';
+    imgWrap.classList.remove('visible');
   }
 
-  document.getElementById('content-textarea').value = item.content || '';
-  document.getElementById('footer-meta').textContent = '尚未修改';
-
-  updateImageZone(item.imageUrl || '');
-
-  // mark dirty on change
-  document.getElementById('content-textarea').oninput = () => markDirty();
+  // text
+  const textEl = document.getElementById('view-text');
+  if (item.content) {
+    textEl.textContent = item.content;
+    textEl.classList.remove('empty');
+  } else {
+    textEl.textContent = '（尚無內容）';
+    textEl.classList.add('empty');
+  }
 }
 
-function markDirty() {
-  S.dirty = true;
-  document.getElementById('footer-meta').textContent = '有未儲存的變更';
-}
-
-function discardChanges() {
-  if (S.currentItem) showEditor(S.currentItem);
-  S.dirty = false;
+// ── Edit Modal ───────────────────────────────────────────────
+function openEditModal() {
+  if (!S.currentItem) return;
+  document.getElementById('edit-modal-title').textContent = `編輯：${S.currentItem.name}`;
+  document.getElementById('edit-textarea').value = S.currentItem.content || '';
+  document.getElementById('edit-save-meta').textContent = '';
   S.pendingImage = null;
+  updateEditImageZone(S.currentImageUrl);
+  openModal('modal-edit');
+  setTimeout(() => document.getElementById('edit-textarea').focus(), 150);
+}
+
+function discardEdit() {
+  S.pendingImage = null;
+  closeModal('modal-edit');
 }
 
 async function saveCurrentItem() {
   if (!S.currentItem) return;
-  const content  = document.getElementById('content-textarea').value;
+  const content  = document.getElementById('edit-textarea').value;
   let   imageUrl = S.currentImageUrl;
 
-  // 先上傳圖片（如果有待上傳的）
   if (S.pendingImage) {
     try {
-      showToast('上傳圖片中…');
+      document.getElementById('edit-save-meta').textContent = '上傳圖片中…';
       const res = await api('uploadImage', {
         fileName  : S.pendingImage.fileName,
         mimeType  : S.pendingImage.mimeType,
@@ -1096,7 +1027,7 @@ async function saveCurrentItem() {
       S.currentImageUrl = res.imageUrl;
       S.currentFileId   = res.fileId;
       S.pendingImage    = null;
-    } catch(e) { showToast('圖片上傳失敗：' + e.message, true); return; }
+    } catch(e) { showToast('圖片上傳失敗：' + e.message, true); document.getElementById('edit-save-meta').textContent = ''; return; }
   }
 
   try {
@@ -1109,24 +1040,70 @@ async function saveCurrentItem() {
     });
     S.currentItem.content  = content;
     S.currentItem.imageUrl = imageUrl;
-    S.dirty = false;
-    document.getElementById('footer-meta').textContent = '已儲存 ' + new Date().toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit' });
+    closeModal('modal-edit');
+    showViewContent(S.currentItem);   // 更新右側檢視
+    await loadItems();                 // 更新圖片小圓點
     showToast('已儲存');
-    await loadItems();
-  } catch(e) { showToast(e.message, true); }
+  } catch(e) { showToast(e.message, true); document.getElementById('edit-save-meta').textContent = ''; }
 }
 
-async function saveItemTitle() {
-  if (!S.currentItem) return;
-  const newName = document.getElementById('content-title').value.trim();
-  if (!newName || newName === S.currentItem.name) return;
-  try {
-    await api('renameItem', { sheetId: S.currentNb.sheetId, rowIndex: S.currentItem.rowIndex, newName });
-    S.currentItem.name = newName;
-    await loadItems();
-  } catch(e) { showToast(e.message, true); document.getElementById('content-title').value = S.currentItem.name; }
+// ── Edit Image Zone ──────────────────────────────────────────
+function handleEditImageZoneClick() {
+  if (S.currentImageUrl || S.pendingImage) return;
+  document.getElementById('edit-img-file-input').click();
 }
 
+function handleEditImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('圖片不可超過 5MB', true); return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const dataUrl = ev.target.result;
+    S.pendingImage = { base64: dataUrl.split(',')[1], mimeType: file.type, fileName: file.name, previewUrl: dataUrl };
+    updateEditImageZone(dataUrl, true);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function updateEditImageZone(url, isLocal = false) {
+  const zone    = document.getElementById('edit-image-zone');
+  const preview = document.getElementById('edit-img-preview');
+  const ph      = document.getElementById('edit-img-placeholder');
+  const label   = document.getElementById('edit-img-label');
+  const hint    = document.getElementById('edit-img-hint');
+  const btnArea = document.getElementById('edit-img-btn-area');
+
+  if (url) {
+    zone.classList.add('has-image');
+    preview.src = url; preview.classList.add('visible');
+    ph.classList.add('hidden');
+    label.textContent = isLocal ? '待上傳（儲存時自動上傳）' : '已附加圖片';
+    hint.textContent  = '';
+    btnArea.innerHTML = `<button class="btn-sm danger" onclick="removeEditImage(event)">移除圖片</button>`;
+  } else {
+    zone.classList.remove('has-image');
+    preview.src = ''; preview.classList.remove('visible');
+    ph.classList.remove('hidden');
+    label.textContent = '附加圖片（最多 1 張）';
+    hint.textContent  = '點擊上傳圖片';
+    btnArea.innerHTML = '';
+  }
+}
+
+async function removeEditImage(e) {
+  e.stopPropagation();
+  if (S.currentFileId) {
+    try { await api('deleteImage', { fileId: S.currentFileId }); } catch(_) {}
+    S.currentFileId = '';
+  }
+  S.currentImageUrl = '';
+  S.pendingImage    = null;
+  updateEditImageZone('');
+}
+
+// ── Items: create / rename / delete ─────────────────────────
 async function createItem() {
   const name = document.getElementById('new-item-name').value.trim();
   if (!name || !S.currentNb) return;
@@ -1135,8 +1112,9 @@ async function createItem() {
     closeModal('modal-new-item');
     document.getElementById('new-item-name').value = '';
     await loadItems();
+    // 選取新建的項目，並直接開啟編輯彈窗
     const newItem = S.items.find(i => i.rowIndex === res.rowIndex);
-    if (newItem) selectItem(newItem);
+    if (newItem) { await selectItem(newItem); openEditModal(); }
     showToast('記事項目已建立');
   } catch(e) { showToast(e.message, true); }
 }
@@ -1146,7 +1124,6 @@ function showRenameItemModal() {
   document.getElementById('rename-item-name').value = S.currentItem.name;
   openModal('modal-rename-item');
 }
-
 async function renameItem() {
   const newName = document.getElementById('rename-item-name').value.trim();
   if (!newName || !S.currentItem) return;
@@ -1154,7 +1131,7 @@ async function renameItem() {
     await api('renameItem', { sheetId: S.currentNb.sheetId, rowIndex: S.currentItem.rowIndex, newName });
     closeModal('modal-rename-item');
     S.currentItem.name = newName;
-    document.getElementById('content-title').value = newName;
+    document.getElementById('view-title').textContent = newName;
     await loadItems();
     showToast('已重新命名');
   } catch(e) { showToast(e.message, true); }
@@ -1169,104 +1146,33 @@ function confirmDeleteItem() {
       await api('deleteItem', { sheetId: S.currentNb.sheetId, rowIndex: S.currentItem.rowIndex });
       closeModal('modal-confirm');
       S.currentItem = null;
-      S.dirty = false;
       await loadItems();
-      showPlaceholder();
+      showViewPlaceholder();
       showToast('已刪除');
     } catch(e) { showToast(e.message, true); }
   };
   openModal('modal-confirm');
 }
 
-// ── Image ──────────────────────────────────────────────────
-function handleImageZoneClick() {
-  if (S.currentImageUrl || S.pendingImage) return;
-  document.getElementById('img-file-input').click();
-}
-
-function handleImageUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { showToast('圖片不可超過 5MB', true); return; }
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const dataUrl = ev.target.result;
-    const base64  = dataUrl.split(',')[1];
-    S.pendingImage = { file, base64, mimeType: file.type, fileName: file.name };
-    updateImageZone(dataUrl, true);
-    markDirty();
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-}
-
-function updateImageZone(url, isLocal = false) {
-  const zone        = document.getElementById('image-zone');
-  const preview     = document.getElementById('img-preview');
-  const placeholder = document.getElementById('img-placeholder');
-  const label       = document.getElementById('img-zone-label');
-  const hint        = document.getElementById('img-zone-hint');
-  const btnArea     = document.getElementById('img-btn-area');
-
-  if (url) {
-    zone.classList.add('has-image');
-    preview.src = url;
-    preview.classList.add('visible');
-    placeholder.classList.add('hidden');
-    label.textContent = isLocal ? '待上傳（儲存時會自動上傳）' : '已附加圖片';
-    hint.textContent  = '';
-    btnArea.innerHTML = `<button class="btn-sm danger" onclick="removeImage(event)">移除圖片</button>`;
-  } else {
-    zone.classList.remove('has-image');
-    preview.src = '';
-    preview.classList.remove('visible');
-    placeholder.classList.remove('hidden');
-    label.textContent = '附加圖片（最多 1 張）';
-    hint.textContent  = '點擊上傳圖片';
-    btnArea.innerHTML = '';
-  }
-}
-
-async function removeImage(e) {
-  e.stopPropagation();
-  if (S.currentFileId) {
-    try { await api('deleteImage', { fileId: S.currentFileId }); } catch(_) {}
-    S.currentFileId = '';
-  }
-  S.currentImageUrl = '';
-  S.pendingImage    = null;
-  updateImageZone('');
-  markDirty();
-}
-
-// ── Settings ───────────────────────────────────────────────
+// ── Settings ─────────────────────────────────────────────────
 function showSettingsModal() {
   document.getElementById('cfg-api-url').value  = S.apiUrl;
   document.getElementById('cfg-sheet-id').value = '';
   document.getElementById('cfg-password').value = '';
   openModal('modal-settings');
-  // fetch current config to populate sheet id
   if (S.apiUrl) {
-    api('getConfig').then(data => {
-      document.getElementById('cfg-sheet-id').value = data.mainSpreadsheetId || '';
-    }).catch(() => {});
+    api('getConfig').then(d => { document.getElementById('cfg-sheet-id').value = d.mainSpreadsheetId || ''; }).catch(()=>{});
   }
 }
-
 async function saveSettings() {
   const apiUrl   = document.getElementById('cfg-api-url').value.trim();
   const sheetId  = document.getElementById('cfg-sheet-id').value.trim();
   const password = document.getElementById('cfg-password').value;
-
   if (!apiUrl) { showToast('請填入 Web App URL', true); return; }
   S.apiUrl = apiUrl;
   localStorage.setItem('apiUrl', apiUrl);
-
   try {
-    await api('saveConfig', {
-      mainSpreadsheetId : sheetId,
-      password          : password || undefined,
-    });
+    await api('saveConfig', { mainSpreadsheetId: sheetId, password: password || undefined });
     closeModal('modal-settings');
     showToast('設定已儲存');
     document.getElementById('loading').classList.remove('hidden');
@@ -1275,29 +1181,23 @@ async function saveSettings() {
   } catch(e) { showToast(e.message, true); }
 }
 
-// ── Modal helpers ──────────────────────────────────────────
+// ── Modal helpers ─────────────────────────────────────────────
 function openModal(id) {
   document.getElementById(id).classList.add('open');
-  // auto-focus first input
-  setTimeout(() => {
-    const input = document.querySelector(`#${id} input`);
-    if (input) input.focus();
-  }, 120);
+  setTimeout(() => { const inp = document.querySelector(`#${id} input, #${id} textarea`); if (inp) inp.focus(); }, 150);
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// Close on backdrop click
 document.querySelectorAll('.modal-backdrop').forEach(bd => {
   bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
 });
 
 function showNewNotebookModal() { openModal('modal-new-notebook'); }
-function showNewItemModal()     {
+function showNewItemModal() {
   if (!S.currentNb) { showToast('請先選擇記事本', true); return; }
   openModal('modal-new-item');
 }
 
-// ── Toast ──────────────────────────────────────────────────
+// ── Toast ─────────────────────────────────────────────────────
 let _toastTimer;
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
@@ -1307,15 +1207,11 @@ function showToast(msg, isError = false) {
   _toastTimer = setTimeout(() => t.className = '', 2800);
 }
 
-// ── Utilities ──────────────────────────────────────────────
+// ── Utils ─────────────────────────────────────────────────────
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Warn before unload if dirty
-window.addEventListener('beforeunload', e => { if (S.dirty) e.preventDefault(); });
-
-// ── Start ──────────────────────────────────────────────────
 window.addEventListener('load', init);
 </script>
 </body>
