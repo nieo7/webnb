@@ -724,6 +724,18 @@ body.dark #start-overlay { background: #0e0e0c; }
   #view-title { font-size: 16px; }
   #view-body { padding: 14px 14px 24px; }
 
+  /* 複製、刪除、編輯三顆按鈕：手機只留 icon，隱藏文字 */
+  #btn-copy-content,
+  #view-header .btn-sm,
+  #view-header .btn-edit {
+    font-size: 0;
+    gap: 0;
+    padding: 7px 10px;
+  }
+  #btn-copy-content svg,
+  #view-header .btn-sm svg,
+  #view-header .btn-edit svg { flex-shrink: 0; }
+
   /* 收合時的 + 按鈕置中 */
   #item-panel:not(.expanded) #btn-add-item { margin: 0 auto; }
 
