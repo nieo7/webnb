@@ -810,6 +810,7 @@ body.dark #start-overlay { background: #0e0e0c; }
         onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-3)'">&#xff0b;</button>
     </div>
     <div id="item-list"></div>
+    <div style="padding:8px 0 10px;text-align:center;font-size:10px;color:var(--ink-4);letter-spacing:0.04em;flex-shrink:0;user-select:none;">v 26.05.02</div>
   </div>
 
   <!-- Mobile panel overlay -->
@@ -1562,13 +1563,28 @@ document.getElementById('item-panel').addEventListener('click', function(e) {
 });
 
 // ── Modal helpers ─────────────────────────────────────────────
+// 點擊背景不關閉的 modal（編輯中，避免內容意外消失）
+const MODAL_NO_BACKDROP_CLOSE = new Set([
+  'modal-new-notebook',
+  'modal-rename-notebook',
+  'modal-edit',
+]);
+
 function openModal(id) {
   document.getElementById(id).classList.add('open');
   setTimeout(() => { const inp = document.querySelector(`#${id} input, #${id} textarea`); if (inp) inp.focus(); }, 150);
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-backdrop').forEach(bd => {
-  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+  bd.addEventListener('click', e => {
+    if (e.target !== bd) return;
+    if (MODAL_NO_BACKDROP_CLOSE.has(bd.id)) {
+      // 編輯類彈窗：點背景不關閉，給提示
+      showToast('請使用「取消」或「儲存」按鈕關閉');
+      return;
+    }
+    bd.classList.remove('open');
+  });
 });
 
 function showNewNotebookModal() { openModal('modal-new-notebook'); }
