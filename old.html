@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的記事本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:        #1a1a18;
+  --ink-2:      #4a4a45;
+  --ink-3:      #8a8a82;
+  --ink-4:      #c8c8be;
+  --paper:      #f5f3ee;
+  --paper-2:    #edeae2;
+  --paper-3:    #e3dfd5;
+  --accent:     #5c6b3a;
+  --accent-2:   #8a9e57;
+  --accent-bg:  #edf0e6;
+  --danger:     #a33a2a;
+  --danger-bg:  #f5ecea;
+  --warn:       #8a6a1a;
+  --warn-bg:    #f5f0e0;
+  --radius:     6px;
+  --radius-lg:  10px;
+  --shadow:     0 1px 3px rgba(26,26,24,0.08), 0 1px 2px rgba(26,26,24,0.04);
+  --shadow-md:  0 4px 16px rgba(26,26,24,0.13), 0 2px 4px rgba(26,26,24,0.07);
+  --transition: 0.18s ease;
+  --font-serif: 'Noto Serif TC', serif;
+  --font-sans:  'Noto Sans TC', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+/* ── Start Code Overlay ──────────────────────────────── */
+#start-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+#start-overlay.hidden { display: none; }
+.start-card {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px 32px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.start-card-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--accent-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.start-card h2 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.start-card p {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+#start-code-input {
+  width: 100%;
+  padding: 11px 16px;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius);
+  background: var(--paper-2);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  color: var(--ink);
+  outline: none;
+  text-align: center;
+  letter-spacing: 0.25em;
+  transition: border-color var(--transition);
+}
+#start-code-input:focus { border-color: var(--accent-2); background: #fff; }
+#start-code-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+#start-code-btn:hover { background: var(--accent-2); }
+#start-code-err {
+  font-size: 12px;
+  color: var(--danger);
+  min-height: 16px;
+}
+
+/* ── Top Bar ─────────────────────────────────────────── */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 52px;
+  background: #1a1a18;   /* 固定深色，不跟隨 CSS 變數，深色/淺色模式皆一致 */
+  color: #f5f3ee;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.app-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f5f3ee;         /* 固定淺色文字 */
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-topbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.10);
+  color: #f5f3ee;         /* 固定淺色文字 */
+  font-family: var(--font-sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+.btn-topbar:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Notebook Tabs ───────────────────────────────────── */
+#tab-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0 12px;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--paper-3);
+  flex-shrink: 0;
+  overflow-x: auto;
+  min-height: 42px;
+}
+#tab-bar::-webkit-scrollbar { height: 0; }
+.nb-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px 7px;
+  font-size: 13px;
+  color: var(--ink-3);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition), background var(--transition);
+  user-select: none;
+  margin-top: 6px;
+}
+.nb-tab:hover { color: var(--ink-2); background: var(--paper-3); }
+.nb-tab.active {
+  background: var(--paper);
+  border-color: var(--paper-3);
+  border-bottom-color: var(--paper);
+  color: var(--ink);
+  font-weight: 500;
+}
+.nb-tab.encrypted .lock-icon { color: var(--warn); }
+.nb-tab.dragging { opacity: 0.4; }
+.nb-tab.drag-over { border-left: 2px solid var(--accent); }
+
+/* ── Main Layout ─────────────────────────────────────── */
+#main { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+/* ── Item List ───────────────────────────────────────── */
+#item-panel {
+  width: 210px;
+  flex-shrink: 0;
+  background: var(--paper-2);
+  border-right: 1px solid var(--paper-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
+  z-index: 20;
+}
+.panel-header {
+  padding: 10px 14px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--paper-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* 手機收合時，header 文字隱藏，只留 + 按鈕 */
+.panel-header-text { transition: opacity 0.2s ease; }
+#item-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  user-select: none;
+}
+.item-row:hover { background: var(--paper-3); color: var(--ink); }
+.item-row.active {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+.item-row.dragging { opacity: 0.35; }
+.item-row.drag-over { border-top: 2px solid var(--accent); }
+.item-grip { color: var(--ink-4); flex-shrink: 0; cursor: grab; display: flex; }
+.item-grip:active { cursor: grabbing; }
+.item-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-img-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-2); flex-shrink: 0; }
+
+/* ── Content Area (right) ────────────────────────────── */
+#content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  min-width: 0;
+}
+
+/* ── Mobile overlay (behind expanded sidebar) ─────── */
+#panel-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(26,26,24,0.38);
+  z-index: 15;
+}
+
+/* ── View Mode (read-only) ───────────────────────────── */
+#view-mode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#view-header {
+  padding: 14px 24px 12px;
+  border-bottom: 1px solid var(--paper-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+#view-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#view-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 圖片顯示：原尺寸，最大寬度 520px */
+#view-image-wrap { display: none; }
+#view-image-wrap.visible { display: block; }
+#view-img {
+  display: block;
+  max-width: 520px;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+#view-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#view-text.empty { color: var(--ink-4); font-style: italic; }
+
+/* ── Empty / Lock screens ────────────────────────────── */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--ink-4);
+  padding: 24px;
+  text-align: center;
+}
+.empty-state svg { opacity: 0.35; }
+.empty-state p { font-size: 13px; }
+
+#lock-screen {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+}
+#lock-screen.visible { display: flex; }
+.lock-card {
+  background: #fff;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.lock-card h3 { font-family: var(--font-serif); font-size: 17px; margin-bottom: 6px; color: var(--ink); }
+.lock-card p  { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+.lock-card input {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color var(--transition);
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+.lock-card input:focus { border-color: var(--accent-2); }
+.lock-card .btn-sm { width: 100%; justify-content: center; padding: 9px; font-size: 14px; }
+
+/* ── Buttons ─────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.badge-enc { background: var(--warn-bg); color: var(--warn); }
+
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--paper-3);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-sm:hover { background: var(--paper-2); border-color: var(--ink-4); color: var(--ink); }
+.btn-sm.danger { color: var(--danger); }
+.btn-sm.danger:hover { background: var(--danger-bg); border-color: var(--danger); }
+.btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-sm.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-edit:hover { background: var(--accent); color: #fff; }
+
+/* ── Copy button ─────────────────────────────────────── */
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--paper-3);
+  background: var(--paper);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-copy:hover { background: var(--paper-2); border-color: var(--ink-4); color: var(--ink-2); }
+.btn-copy.copied { color: var(--accent); border-color: var(--accent-2); background: var(--accent-bg); }
+
+/* ── Modal (general) ─────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(26,26,24,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  min-width: 340px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: var(--shadow-md);
+  transform: translateY(8px);
+  transition: transform 0.2s ease;
+}
+.modal-backdrop.open .modal { transform: translateY(0); }
+.modal h3 { font-family: var(--font-serif); font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--ink); }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-bottom: 5px; letter-spacing: 0.04em; }
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="url"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius);
+  background: #fff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition);
+}
+.form-group input:focus { border-color: var(--accent-2); }
+.form-group input::placeholder { color: var(--ink-4); }
+.form-group .hint { font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.toggle-label { font-size: 13px; color: var(--ink-2); }
+.toggle { position: relative; width: 38px; height: 22px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--ink-4); border-radius: 99px; cursor: pointer; transition: background var(--transition); }
+.toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform var(--transition); }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.modal-divider { border: none; border-top: 1px solid var(--paper-3); margin: 16px 0; }
+
+/* ── Edit Modal (large, tall) ────────────────────────── */
+#modal-edit .modal {
+  max-width: 680px;
+  width: 95%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.edit-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+#edit-textarea {
+  resize: none;
+  border: 1px solid var(--paper-3);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  transition: border-color var(--transition);
+  min-height: calc(85vh - 280px);
+  flex: 1;
+}
+#edit-textarea:focus { border-color: var(--accent-2); }
+#edit-textarea::placeholder { color: var(--ink-4); }
+
+/* image zone in edit modal */
+#edit-image-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--ink-4);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  flex-shrink: 0;
+}
+#edit-image-zone:hover { border-color: var(--accent-2); background: var(--accent-bg); }
+#edit-image-zone.has-image { border-style: solid; border-color: var(--paper-3); cursor: default; }
+#edit-img-preview { width: 60px; height: 60px; border-radius: var(--radius); object-fit: cover; display: none; flex-shrink: 0; }
+#edit-img-preview.visible { display: block; }
+.edit-img-placeholder {
+  width: 60px; height: 60px;
+  border-radius: var(--radius);
+  background: var(--paper-2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--ink-3);
+}
+.edit-img-placeholder.hidden { display: none; }
+.edit-img-info { flex: 1; }
+.edit-img-info p { font-size: 13px; color: var(--ink-2); }
+.edit-img-info small { font-size: 11px; color: var(--ink-3); }
+#edit-img-file-input { display: none; }
+
+/* ── Toast ───────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 9px 18px;
+  border-radius: 99px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 200;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.error { background: var(--danger); }
+
+/* ── Loading ─────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0;
+  background: var(--paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; z-index: 300;
+  transition: opacity 0.3s ease;
+}
+#loading.hidden { opacity: 0; pointer-events: none; }
+.spinner { width: 28px; height: 28px; border: 2.5px solid var(--paper-3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--ink-3); }
+
+/* ── Dark Mode ───────────────────────────────────────── */
+body.dark {
+  --ink:        #e8e6e0;
+  --ink-2:      #b8b5ae;
+  --ink-3:      #7a7870;
+  --ink-4:      #4a4845;
+  --paper:      #1c1b18;
+  --paper-2:    #242320;
+  --paper-3:    #2e2c28;
+  --accent:     #8a9e57;
+  --accent-2:   #a8be72;
+  --accent-bg:  #252e18;
+  --danger:     #c8584a;
+  --danger-bg:  #2e1a18;
+  --warn:       #c8a040;
+  --warn-bg:    #2e2510;
+  --shadow:     0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+}
+/* topbar 固定深色背景，深色模式不需另外覆寫 */
+body.dark .modal  { background: var(--paper-2); }
+body.dark .lock-card { background: var(--paper-2); }
+body.dark .start-card { background: var(--paper-2); }
+body.dark #start-code-input { background: var(--paper-3); color: var(--ink); border-color: var(--paper-3); }
+body.dark .form-group input[type="text"],
+body.dark .form-group input[type="password"],
+body.dark .form-group input[type="url"],
+body.dark #edit-textarea { background: var(--paper-3); color: var(--ink); border-color: var(--paper-3); }
+body.dark #content-textarea { background: var(--paper-3); }
+body.dark .btn-sm { background: var(--paper-2); border-color: var(--paper-3); }
+body.dark .btn-copy { background: var(--paper-2); border-color: var(--paper-3); }
+body.dark .btn-edit { background: var(--accent-bg); }
+body.dark #edit-image-zone { border-color: var(--ink-4); }
+body.dark #edit-image-zone.has-image { border-color: var(--paper-3); }
+body.dark #start-overlay { background: #0e0e0c; }
+
+/* ── Mobile Responsive ───────────────────────────────── */
+/* 手機直式：寬度 ≤ 600px */
+@media (max-width: 600px) {
+  /* item-panel 固定在左側，收合 64px，展開時 overlay */
+  #item-panel {
+    width: 64px;
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    z-index: 20;
+  }
+  #item-panel.expanded {
+    width: 75vw;
+    max-width: 260px;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* content area 左邊留出 64px 讓收合的 sidebar 不遮到內容 */
+  #content-area {
+    width: 100%;
+    padding-left: 64px;
+  }
+
+  /* 收合時，panel header 文字隱藏，只留 + 按鈕 */
+  #item-panel:not(.expanded) .panel-header-text { opacity: 0; pointer-events: none; }
+  /* 收合時，item grip 隱藏、label 隱藏、img-dot 隱藏 */
+  #item-panel:not(.expanded) .item-grip { display: none; }
+  #item-panel:not(.expanded) .item-label { display: none; }
+  #item-panel:not(.expanded) .item-img-dot { display: none; }
+  /* 收合時 item-row 置中，顯示首字 */
+  #item-panel:not(.expanded) .item-row {
+    justify-content: center;
+    padding: 10px 4px;
+    position: relative;
+  }
+  /* 首字標識 — 用 ::before 顯示序號圓點 */
+  #item-panel:not(.expanded) .item-row::before {
+    content: attr(data-initial);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--paper-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  #item-panel:not(.expanded) .item-row.active::before {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  /* panel overlay（展開時背景遮罩） */
+  #panel-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity 0.28s ease; }
+  #panel-overlay.visible { opacity: 1; pointer-events: all; }
+
+  /* topbar：隱藏按鈕文字，只留圖示 */
+  .btn-topbar .btn-label { display: none; }
+  .btn-topbar { padding: 6px 9px; }
+
+  /* view header 縮排 */
+  #view-header { padding: 12px 14px 10px; flex-wrap: wrap; gap: 8px; }
+  #view-title { font-size: 16px; }
+  #view-body { padding: 14px 14px 24px; }
+
+  /* 複製、刪除、編輯三顆按鈕：手機只留 icon，隱藏文字 */
+  #btn-copy-content,
+  #view-header .btn-sm,
+  #view-header .btn-edit {
+    font-size: 0;
+    gap: 0;
+    padding: 7px 10px;
+  }
+  #btn-copy-content svg,
+  #view-header .btn-sm svg,
+  #view-header .btn-edit svg { flex-shrink: 0; }
+
+  /* 收合時的 + 按鈕置中 */
+  #item-panel:not(.expanded) #btn-add-item { margin: 0 auto; }
+
+  /* 手機版圖片寬度限制 */
+  #view-img { max-width: 100%; }
+
+  /* Modal 全寬 */
+  .modal { min-width: unset; width: 96%; }
+  #modal-edit .modal { width: 98%; max-height: 92vh; }
+}
+
+/* 手機橫式：適度縮減 sidebar */
+@media (max-width: 900px) and (orientation: landscape) {
+  #item-panel { width: 160px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── 啟動碼遮罩 ─────────────────────────────────────── -->
+<div id="start-overlay">
+  <div class="start-card">
+    <div class="start-card-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2>我的記事本</h2>
+    <p>請輸入啟動碼以繼續</p>
+    <input type="password" id="start-code-input" placeholder="••••" maxlength="32"
+      onkeydown="if(event.key==='Enter') verifyStartCode()">
+    <button id="start-code-btn" onclick="verifyStartCode()">進入</button>
+    <div id="start-code-err"></div>
+  </div>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="loading-text">載入中…</p>
+</div>
+<div id="toast"></div>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <div class="app-title">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/></svg>
+    我的記事本
+  </div>
+  <button class="btn-topbar" onclick="showNewNotebookModal()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span class="btn-label">新記事本</span>
+  </button>
+  <button class="btn-topbar" onclick="showSettingsModal()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="btn-label">設定</span>
+  </button>
+</div>
+
+<!-- Notebook Tabs -->
+<div id="tab-bar"></div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Item List (left) -->
+  <div id="item-panel">
+    <div class="panel-header">
+      <span class="panel-header-text">記事項目</span>
+      <button id="btn-add-item" onclick="createItemDirect()" title="新增記事項目"
+        style="background:none;border:none;cursor:pointer;color:var(--ink-3);line-height:1;padding:0 2px;font-size:20px;font-weight:300;display:flex;align-items:center;transition:color 0.18s ease;"
+        onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-3)'">&#xff0b;</button>
+    </div>
+    <div id="item-list"></div>
+    <div style="padding:8px 0 10px;text-align:center;font-size:10px;color:var(--ink-4);letter-spacing:0.04em;flex-shrink:0;user-select:none;">v 26.05.02</div>
+  </div>
+
+  <!-- Mobile panel overlay -->
+  <div id="panel-overlay" onclick="collapseSidebar()"></div>
+
+  <!-- Content Area (right) -->
+  <div id="content-area">
+
+    <!-- Lock screen -->
+    <div id="lock-screen">
+      <div class="lock-card">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:#8a6a1a;margin:0 auto 12px;display:block"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h3>加密的記事本</h3>
+        <p>請輸入密碼以解鎖</p>
+        <input type="password" id="lock-password" placeholder="輸入密碼…" onkeydown="if(event.key==='Enter') unlockCurrent()">
+        <button class="btn-sm primary" onclick="unlockCurrent()">解鎖</button>
+      </div>
+    </div>
+
+    <!-- View Mode -->
+    <div id="view-mode">
+      <!-- Empty placeholder -->
+      <div id="view-placeholder" class="empty-state">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <p>選擇左側記事項目以檢視內容</p>
+      </div>
+
+      <!-- View content (shown when item selected) -->
+      <div id="view-content" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div id="view-header">
+          <span id="view-title"></span>
+          <span id="view-enc-badge" class="badge badge-enc" style="display:none">🔒 加密</span>
+          <!-- 複製內容按鈕 -->
+          <button class="btn-copy" id="btn-copy-content" onclick="copyItemContent()" title="複製文字內容">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            複製內容
+          </button>
+          <button class="btn-sm danger" onclick="confirmDeleteItem()" title="刪除">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            刪除
+          </button>
+          <button class="btn-edit" onclick="openEditModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            編輯
+          </button>
+        </div>
+        <div id="view-body">
+          <!-- image: shown above text -->
+          <div id="view-image-wrap">
+            <img id="view-img" alt="附件圖片">
+          </div>
+          <!-- text content -->
+          <div id="view-text"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content-area -->
+</div><!-- end main -->
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- Settings -->
+<div class="modal-backdrop" id="modal-settings">
+  <div class="modal">
+    <h3>⚙ 設定</h3>
+    <div class="form-group">
+      <label>主試算表 ID</label>
+      <input type="text" id="cfg-sheet-id" placeholder="Google 試算表 ID">
+    </div>
+    <div class="form-group">
+      <label>加密密碼（留空表示不更改）</label>
+      <input type="password" id="cfg-password" placeholder="設定後無法更換，請謹慎">
+    </div>
+    <hr class="modal-divider">
+    <div class="form-group">
+      <label>啟動碼（留空表示不更改）</label>
+      <input type="password" id="cfg-start-code" placeholder="預設為 1234">
+      <div class="hint">啟動碼用於開啟網頁時的身份驗證，存於雲端設定</div>
+    </div>
+    <hr class="modal-divider">
+    <div class="toggle-row">
+      <span class="toggle-label">深色模式</span>
+      <label class="toggle"><input type="checkbox" id="cfg-darkmode" onchange="toggleDark(this.checked)"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-settings')">取消</button>
+      <button class="btn-sm primary" onclick="saveSettings()">儲存設定</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Notebook -->
+<div class="modal-backdrop" id="modal-new-notebook">
+  <div class="modal">
+    <h3>建立新記事本</h3>
+    <div class="form-group">
+      <label>記事本名稱</label>
+      <input type="text" id="new-nb-name" placeholder="例：工作筆記" onkeydown="if(event.key==='Enter') createNotebook()">
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">啟用加密</span>
+      <label class="toggle"><input type="checkbox" id="new-nb-encrypted"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-new-notebook')">取消</button>
+      <button class="btn-sm primary" onclick="createNotebook()">建立</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename Notebook -->
+<div class="modal-backdrop" id="modal-rename-notebook">
+  <div class="modal">
+    <h3>修改記事本名稱</h3>
+    <div class="form-group">
+      <label>新名稱</label>
+      <input type="text" id="rename-nb-name" onkeydown="if(event.key==='Enter') renameNotebook()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-rename-notebook')">取消</button>
+      <button class="btn-sm primary" onclick="renameNotebook()">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="modal-backdrop" id="modal-confirm">
+  <div class="modal">
+    <h3 id="confirm-title">確認刪除</h3>
+    <p id="confirm-msg" style="font-size:13px;color:var(--ink-2);margin-bottom:4px;"></p>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-confirm')">取消</button>
+      <button class="btn-sm danger" id="confirm-ok-btn">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal (large) -->
+<div class="modal-backdrop" id="modal-edit">
+  <div class="modal">
+    <h3 id="edit-modal-title">編輯記事</h3>
+    <div class="edit-modal-body">
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>項目名稱</label>
+        <input type="text" id="edit-item-name" placeholder="請輸入名稱" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('edit-textarea').focus();}">
+      </div>
+      <textarea id="edit-textarea" placeholder="開始輸入記事內容…"></textarea>
+      <!-- image zone -->
+      <div id="edit-image-zone" onclick="handleEditImageZoneClick()">
+        <div class="edit-img-placeholder" id="edit-img-placeholder">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <img id="edit-img-preview" alt="附件圖片">
+        <div class="edit-img-info">
+          <p id="edit-img-label">附加圖片（最多 1 張）</p>
+          <small id="edit-img-hint">點擊上傳圖片</small>
+        </div>
+        <div id="edit-img-btn-area" style="margin-left:auto;display:flex;gap:6px;"></div>
+      </div>
+      <input type="file" id="edit-img-file-input" accept="image/*" onchange="handleEditImageUpload(event)">
+    </div>
+    <div class="modal-actions" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--paper-3);">
+      <span id="edit-save-meta" style="font-size:11px;color:var(--ink-3);margin-right:auto;"></span>
+      <button class="btn-sm" onclick="discardEdit()">取消</button>
+      <button class="btn-sm primary" onclick="saveCurrentItem()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        儲存
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ───────────────────────────────────────────────────
+const S = {
+  apiUrl         : 'https://script.google.com/macros/s/AKfycbwPToRzEYSwY6ppOzOueI2CkKw6N2buDHMknXc7vOLnVA7llKn0xY10ni9ULi15OSHe/exec',
+  notebooks      : [],
+  currentNb      : null,
+  items          : [],
+  currentItem    : null,
+  sessionPwd     : '',
+  pendingImage   : null,
+  currentImageUrl: '',
+  currentFileId  : '',
+};
+
+// ── API ─────────────────────────────────────────────────────
+async function api(action, payload = {}) {
+  const res = await fetch(S.apiUrl, { method: 'POST', body: JSON.stringify({ action, payload }) });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || '操作失敗');
+  return data;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 啟動碼驗證 ──────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+async function verifyStartCode() {
+  const input = document.getElementById('start-code-input');
+  const errEl = document.getElementById('start-code-err');
+  const btn   = document.getElementById('start-code-btn');
+  const entered = input.value;
+
+  if (!entered) { errEl.textContent = '請輸入啟動碼'; return; }
+
+  btn.textContent = '驗證中…';
+  btn.disabled = true;
+  errEl.textContent = '';
+
+  try {
+    // 從 Apps Script 取得啟動碼進行比對
+    const data = await api('getStartCode');
+    const correct = String(data.startCode || '1234');
+    if (entered === correct) {
+      // 驗證成功：隱藏遮罩，開始載入
+      document.getElementById('start-overlay').classList.add('hidden');
+      await initApp();
+    } else {
+      errEl.textContent = '啟動碼錯誤，請重試';
+      input.value = '';
+      input.focus();
+    }
+  } catch(e) {
+    errEl.textContent = '連線失敗，請稍後再試';
+  } finally {
+    btn.textContent = '進入';
+    btn.disabled = false;
+  }
+}
+
+// ── Init ────────────────────────────────────────────────────
+async function initApp() {
+  document.getElementById('loading').classList.remove('hidden');
+  try { await loadNotebooks(); } catch(e) { showToast('無法連線，請確認設定', true); }
+  hideLoading();
+}
+
+function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+
+// ── Notebooks ────────────────────────────────────────────────
+async function loadNotebooks() {
+  const data = await api('listNotebooks');
+  S.notebooks = data.notebooks.sort((a, b) => a.index - b.index);
+  renderTabs();
+  if (S.notebooks.length > 0) {
+    const still = S.currentNb && S.notebooks.find(n => n.sheetId === S.currentNb.sheetId);
+    selectNotebook(still || S.notebooks[0]);
+  }
+}
+
+function renderTabs() {
+  const bar = document.getElementById('tab-bar');
+  bar.innerHTML = '';
+  S.notebooks.forEach(nb => {
+    const tab = document.createElement('div');
+    tab.className = 'nb-tab' + (S.currentNb?.sheetId === nb.sheetId ? ' active' : '') + (nb.encrypted ? ' encrypted' : '');
+    tab.dataset.sheetId = nb.sheetId;
+    tab.draggable = true;
+    tab.innerHTML = nb.encrypted
+      ? `<svg class="lock-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>${escHtml(nb.name)}`
+      : escHtml(nb.name);
+    tab.onclick = () => selectNotebook(nb);
+    tab.oncontextmenu = (e) => { e.preventDefault(); showNotebookCtxMenu(nb); };
+    tab.ondragstart = (e) => { e.dataTransfer.setData('nbSheetId', nb.sheetId); tab.classList.add('dragging'); };
+    tab.ondragend   = () => tab.classList.remove('dragging');
+    tab.ondragover  = (e) => { e.preventDefault(); tab.classList.add('drag-over'); };
+    tab.ondragleave = () => tab.classList.remove('drag-over');
+    tab.ondrop      = async (e) => {
+      e.preventDefault(); tab.classList.remove('drag-over');
+      const fromId = parseInt(e.dataTransfer.getData('nbSheetId'));
+      if (fromId === nb.sheetId) return;
+      const ids = S.notebooks.map(n => n.sheetId);
+      const fi = ids.indexOf(fromId), ti = ids.indexOf(nb.sheetId);
+      ids.splice(fi, 1); ids.splice(ti, 0, fromId);
+      S.notebooks = ids.map(id => S.notebooks.find(n => n.sheetId === id));
+      renderTabs();
+      try { await api('reorderNotebooks', { orderedSheetIds: ids }); } catch(e) { showToast('排序儲存失敗', true); }
+    };
+    bar.appendChild(tab);
+  });
+}
+
+async function selectNotebook(nb) {
+  S.currentNb   = nb;
+  S.currentItem = null;
+  renderTabs();
+  renderItems([]);
+  showViewPlaceholder();
+
+  if (nb.encrypted && !S.sessionPwd) { showLockScreen(); return; }
+  hideLockScreen();
+  await loadItems(true);
+}
+
+function showLockScreen() {
+  document.getElementById('lock-screen').classList.add('visible');
+  document.getElementById('view-mode').style.display = 'none';
+  document.getElementById('lock-password').value = '';
+  setTimeout(() => document.getElementById('lock-password').focus(), 100);
+}
+function hideLockScreen() {
+  document.getElementById('lock-screen').classList.remove('visible');
+  document.getElementById('view-mode').style.display = 'flex';
+}
+
+async function unlockCurrent() {
+  const pwd = document.getElementById('lock-password').value;
+  if (!pwd) return;
+  try {
+    await api('unlockNotebook', { password: pwd });
+    S.sessionPwd = pwd;
+    hideLockScreen();
+    await loadItems(true);
+  } catch(e) { showToast('密碼錯誤', true); document.getElementById('lock-password').select(); }
+}
+
+function showNotebookCtxMenu(nb) {
+  const action = prompt(`記事本「${nb.name}」\n輸入操作：rename（改名）或 delete（刪除）`);
+  if (action === 'rename') showRenameNotebookModal(nb);
+  else if (action === 'delete') confirmDeleteNotebook(nb);
+}
+
+async function createNotebook() {
+  const name      = document.getElementById('new-nb-name').value.trim();
+  const encrypted = document.getElementById('new-nb-encrypted').checked;
+  if (!name) return;
+  try {
+    await api('createNotebook', { name, encrypted });
+    closeModal('modal-new-notebook');
+    document.getElementById('new-nb-name').value = '';
+    document.getElementById('new-nb-encrypted').checked = false;
+    await loadNotebooks();
+    showToast('記事本已建立');
+  } catch(e) { showToast(e.message, true); }
+}
+
+function showRenameNotebookModal(nb) {
+  document.getElementById('rename-nb-name').value = nb.name;
+  document.getElementById('rename-nb-name').dataset.sheetId = nb.sheetId;
+  openModal('modal-rename-notebook');
+}
+async function renameNotebook() {
+  const input   = document.getElementById('rename-nb-name');
+  const newName = input.value.trim();
+  const sheetId = parseInt(input.dataset.sheetId);
+  if (!newName) return;
+  try {
+    await api('renameNotebook', { sheetId, newName });
+    closeModal('modal-rename-notebook');
+    await loadNotebooks();
+    showToast('已重新命名');
+  } catch(e) { showToast(e.message, true); }
+}
+
+function confirmDeleteNotebook(nb) {
+  document.getElementById('confirm-title').textContent = '刪除記事本';
+  document.getElementById('confirm-msg').textContent   = `確定要刪除「${nb.name}」？此操作無法復原。`;
+  document.getElementById('confirm-ok-btn').onclick    = async () => {
+    try {
+      await api('deleteNotebook', { sheetId: nb.sheetId });
+      closeModal('modal-confirm');
+      S.currentNb = null;
+      await loadNotebooks();
+      showToast('記事本已刪除');
+    } catch(e) { showToast(e.message, true); }
+  };
+  openModal('modal-confirm');
+}
+
+// ── Items ────────────────────────────────────────────────────
+async function loadItems(autoSelectFirst = false) {
+  try {
+    const data = await api('listItems', { sheetId: S.currentNb.sheetId });
+    S.items = data.items.sort((a, b) => a.seq - b.seq);
+    renderItems(S.items);
+    if (autoSelectFirst && S.items.length > 0 && !S.currentItem) {
+      await selectItem(S.items[0]);
+    }
+  } catch(e) { showToast('載入記事項目失敗', true); }
+}
+
+function renderItems(items) {
+  const list = document.getElementById('item-list');
+  list.innerHTML = '';
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'item-row' + (S.currentItem?.rowIndex === item.rowIndex ? ' active' : '');
+    row.draggable = true;
+    // data-initial：手機收合時顯示的首字（取名稱第一個字，或序號）
+    row.dataset.initial = item.name ? item.name.charAt(0) : String(idx + 1);
+    row.innerHTML = `
+      <span class="item-grip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+      </span>
+      <span class="item-label">${escHtml(item.name)}</span>
+      ${item.hasImage ? '<span class="item-img-dot"></span>' : ''}
+    `;
+    row.onclick = () => {
+      // 手機：若 sidebar 是收合狀態，先展開讓用戶看到清單
+      const panel = document.getElementById('item-panel');
+      if (isMobile() && !panel.classList.contains('expanded')) {
+        expandSidebar();
+        return; // 展開後不立即選取，讓用戶確認
+      }
+      selectItem(item);
+      // 手機：選完自動收合
+      if (isMobile()) collapseSidebar();
+    };
+    row.ondragstart = (e) => { e.dataTransfer.setData('itemRowIndex', item.rowIndex); row.classList.add('dragging'); };
+    row.ondragend   = () => row.classList.remove('dragging');
+    row.ondragover  = (e) => { e.preventDefault(); row.classList.add('drag-over'); };
+    row.ondragleave = () => row.classList.remove('drag-over');
+    row.ondrop      = async (e) => {
+      e.preventDefault(); row.classList.remove('drag-over');
+      const fromIdx = parseInt(e.dataTransfer.getData('itemRowIndex'));
+      if (fromIdx === item.rowIndex) return;
+      const idxs = S.items.map(i => i.rowIndex);
+      const fi = idxs.indexOf(fromIdx), ti = idxs.indexOf(item.rowIndex);
+      idxs.splice(fi, 1); idxs.splice(ti, 0, fromIdx);
+      S.items = idxs.map(idx => S.items.find(i => i.rowIndex === idx));
+      renderItems(S.items);
+      try { await api('reorderItems', { sheetId: S.currentNb.sheetId, orderedRowIndexes: idxs }); }
+      catch(e) { showToast('排序儲存失敗', true); }
+    };
+    list.appendChild(row);
+  });
+}
+
+async function selectItem(item) {
+  try {
+    const data = await api('getItem', {
+      sheetId  : S.currentNb.sheetId,
+      rowIndex : item.rowIndex,
+      password : S.sessionPwd || undefined,
+    });
+    S.currentItem      = data;
+    S.currentImageUrl  = data.imageUrl || '';
+    S.currentFileId    = '';
+    S.pendingImage     = null;
+    renderItems(S.items);
+    showViewContent(data);
+  } catch(e) {
+    if (e.message === 'NEED_PASSWORD' || e.message === 'WRONG_PASSWORD') {
+      showToast('需要密碼，請重新解鎖', true); showLockScreen();
+    } else showToast(e.message, true);
+  }
+}
+
+// ── View Mode ────────────────────────────────────────────────
+function showViewPlaceholder() {
+  document.getElementById('view-placeholder').style.display = 'flex';
+  document.getElementById('view-content').style.display     = 'none';
+}
+
+function showViewContent(item) {
+  document.getElementById('view-placeholder').style.display = 'none';
+  const vc = document.getElementById('view-content');
+  vc.style.display = 'flex';
+
+  document.getElementById('view-title').textContent = item.name;
+
+  const badge = document.getElementById('view-enc-badge');
+  badge.style.display = item.encrypted ? '' : 'none';
+
+  const imgWrap = document.getElementById('view-image-wrap');
+  const viewImg = document.getElementById('view-img');
+  if (item.imageUrl) {
+    viewImg.src = item.imageUrl;
+    imgWrap.classList.add('visible');
+  } else {
+    viewImg.src = '';
+    imgWrap.classList.remove('visible');
+  }
+
+  const textEl = document.getElementById('view-text');
+  if (item.content) {
+    textEl.textContent = item.content;
+    textEl.classList.remove('empty');
+  } else {
+    textEl.textContent = '（尚無內容）';
+    textEl.classList.add('empty');
+  }
+
+  // 重設複製按鈕狀態
+  const copyBtn = document.getElementById('btn-copy-content');
+  if (copyBtn) {
+    copyBtn.classList.remove('copied');
+    copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 複製內容`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 複製內容功能 ────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+async function copyItemContent() {
+  const text = S.currentItem?.content || '';
+  if (!text) { showToast('沒有可複製的文字內容'); return; }
+
+  const btn = document.getElementById('btn-copy-content');
+
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (_) {
+    // Fallback：建立隱藏 textarea 選取並複製
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch(e2) { showToast('複製失敗，請手動選取', true); document.body.removeChild(ta); return; }
+    document.body.removeChild(ta);
+  }
+
+  // 按鈕視覺回饋
+  if (btn) {
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 已複製`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 複製內容`;
+    }, 2000);
+  }
+  showToast('已複製到剪貼簿');
+}
+
+// ── Edit Modal ───────────────────────────────────────────────
+function openEditModal(isNew = false) {
+  if (!S.currentItem) return;
+  document.getElementById('edit-modal-title').textContent = isNew ? '新增記事項目' : '編輯記事';
+  document.getElementById('edit-item-name').value = S.currentItem.name === '新記事' && isNew ? '' : S.currentItem.name;
+  document.getElementById('edit-item-name').placeholder = isNew ? '輸入項目名稱…' : S.currentItem.name;
+  document.getElementById('edit-textarea').value = S.currentItem.content || '';
+  document.getElementById('edit-save-meta').textContent = '';
+  S.pendingImage = null;
+  updateEditImageZone(S.currentImageUrl);
+  openModal('modal-edit');
+  setTimeout(() => {
+    const target = isNew ? document.getElementById('edit-item-name') : document.getElementById('edit-textarea');
+    target.focus();
+  }, 150);
+}
+
+function discardEdit() {
+  S.pendingImage = null;
+  closeModal('modal-edit');
+}
+
+async function saveCurrentItem() {
+  if (!S.currentItem) return;
+  const newName  = document.getElementById('edit-item-name').value.trim();
+  const content  = document.getElementById('edit-textarea').value;
+  let   imageUrl = S.currentImageUrl;
+
+  if (newName && newName !== S.currentItem.name) {
+    try {
+      await api('renameItem', { sheetId: S.currentNb.sheetId, rowIndex: S.currentItem.rowIndex, newName });
+      S.currentItem.name = newName;
+    } catch(e) { showToast('名稱儲存失敗：' + e.message, true); return; }
+  }
+
+  if (S.pendingImage) {
+    try {
+      document.getElementById('edit-save-meta').textContent = '上傳圖片中…';
+      const res = await api('uploadImage', {
+        fileName  : S.pendingImage.fileName,
+        mimeType  : S.pendingImage.mimeType,
+        base64Data: S.pendingImage.base64,
+      });
+      imageUrl          = res.imageUrl;
+      S.currentImageUrl = res.imageUrl;
+      S.currentFileId   = res.fileId;
+      S.pendingImage    = null;
+    } catch(e) { showToast('圖片上傳失敗：' + e.message, true); document.getElementById('edit-save-meta').textContent = ''; return; }
+  }
+
+  try {
+    await api('saveItem', {
+      sheetId  : S.currentNb.sheetId,
+      rowIndex : S.currentItem.rowIndex,
+      content,
+      imageUrl,
+      password : S.sessionPwd || undefined,
+    });
+    S.currentItem.content  = content;
+    S.currentItem.imageUrl = imageUrl;
+    document.getElementById('view-title').textContent = S.currentItem.name;
+    closeModal('modal-edit');
+    showViewContent(S.currentItem);
+    await loadItems();
+    showToast('已儲存');
+  } catch(e) { showToast(e.message, true); document.getElementById('edit-save-meta').textContent = ''; }
+}
+
+// ── Edit Image Zone ──────────────────────────────────────────
+function handleEditImageZoneClick() {
+  if (S.currentImageUrl || S.pendingImage) return;
+  document.getElementById('edit-img-file-input').click();
+}
+
+function handleEditImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('圖片不可超過 5MB', true); return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const dataUrl = ev.target.result;
+    S.pendingImage = { base64: dataUrl.split(',')[1], mimeType: file.type, fileName: file.name, previewUrl: dataUrl };
+    updateEditImageZone(dataUrl, true);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function updateEditImageZone(url, isLocal = false) {
+  const zone    = document.getElementById('edit-image-zone');
+  const preview = document.getElementById('edit-img-preview');
+  const ph      = document.getElementById('edit-img-placeholder');
+  const label   = document.getElementById('edit-img-label');
+  const hint    = document.getElementById('edit-img-hint');
+  const btnArea = document.getElementById('edit-img-btn-area');
+
+  if (url) {
+    zone.classList.add('has-image');
+    preview.src = url; preview.classList.add('visible');
+    ph.classList.add('hidden');
+    label.textContent = isLocal ? '待上傳（儲存時自動上傳）' : '已附加圖片';
+    hint.textContent  = '';
+    btnArea.innerHTML = `<button class="btn-sm danger" onclick="removeEditImage(event)">移除圖片</button>`;
+  } else {
+    zone.classList.remove('has-image');
+    preview.src = ''; preview.classList.remove('visible');
+    ph.classList.remove('hidden');
+    label.textContent = '附加圖片（最多 1 張）';
+    hint.textContent  = '點擊上傳圖片';
+    btnArea.innerHTML = '';
+  }
+}
+
+async function removeEditImage(e) {
+  e.stopPropagation();
+  if (S.currentFileId) {
+    try { await api('deleteImage', { fileId: S.currentFileId }); } catch(_) {}
+    S.currentFileId = '';
+  }
+  S.currentImageUrl = '';
+  S.pendingImage    = null;
+  updateEditImageZone('');
+}
+
+// ── Items: create / rename / delete ─────────────────────────
+async function createItemDirect() {
+  if (!S.currentNb) { showToast('請先選擇記事本', true); return; }
+  try {
+    const res = await api('createItem', { sheetId: S.currentNb.sheetId, name: '新記事' });
+    await loadItems();
+    const newItem = S.items.find(i => i.rowIndex === res.rowIndex);
+    if (newItem) { await selectItem(newItem); openEditModal(true); }
+  } catch(e) { showToast(e.message, true); }
+}
+
+async function createItem() { await createItemDirect(); }
+
+function confirmDeleteItem() {
+  if (!S.currentItem) return;
+  document.getElementById('confirm-title').textContent = '刪除記事項目';
+  document.getElementById('confirm-msg').textContent   = `確定要刪除「${S.currentItem.name}」？`;
+  document.getElementById('confirm-ok-btn').onclick    = async () => {
+    try {
+      await api('deleteItem', { sheetId: S.currentNb.sheetId, rowIndex: S.currentItem.rowIndex });
+      closeModal('modal-confirm');
+      S.currentItem = null;
+      await loadItems();
+      showViewPlaceholder();
+      showToast('已刪除');
+    } catch(e) { showToast(e.message, true); }
+  };
+  openModal('modal-confirm');
+}
+
+// ── Settings ─────────────────────────────────────────────────
+function showSettingsModal() {
+  document.getElementById('cfg-sheet-id').value    = '';
+  document.getElementById('cfg-password').value    = '';
+  document.getElementById('cfg-start-code').value  = '';
+  document.getElementById('cfg-darkmode').checked  = document.body.classList.contains('dark');
+  openModal('modal-settings');
+  api('getConfig').then(d => {
+    document.getElementById('cfg-sheet-id').value = d.mainSpreadsheetId || '';
+  }).catch(() => {});
+}
+
+function toggleDark(on) {
+  document.body.classList.toggle('dark', on);
+  localStorage.setItem('darkMode', on ? '1' : '');
+}
+
+async function saveSettings() {
+  const sheetId   = document.getElementById('cfg-sheet-id').value.trim();
+  const password  = document.getElementById('cfg-password').value;
+  const startCode = document.getElementById('cfg-start-code').value;
+
+  try {
+    // 儲存主設定（sheet ID、密碼）
+    await api('saveConfig', { mainSpreadsheetId: sheetId, password: password || undefined });
+
+    // 若有填啟動碼，另外儲存
+    if (startCode) {
+      await api('saveStartCode', { startCode });
+    }
+
+    closeModal('modal-settings');
+    showToast('設定已儲存');
+    document.getElementById('loading').classList.remove('hidden');
+    await loadNotebooks();
+    hideLoading();
+  } catch(e) { showToast(e.message, true); }
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 手機側邊欄展開/收合 ──────────────────────────────────
+// ══════════════════════════════════════════════════════════
+function isMobile() { return window.innerWidth <= 600; }
+
+function expandSidebar() {
+  const panel   = document.getElementById('item-panel');
+  const overlay = document.getElementById('panel-overlay');
+  panel.classList.add('expanded');
+  overlay.classList.add('visible');
+}
+
+function collapseSidebar() {
+  const panel   = document.getElementById('item-panel');
+  const overlay = document.getElementById('panel-overlay');
+  panel.classList.remove('expanded');
+  overlay.classList.remove('visible');
+}
+
+// 手機模式下，點擊收合的 sidebar 任意處 → 展開
+document.getElementById('item-panel').addEventListener('click', function(e) {
+  if (!isMobile()) return;
+  if (!this.classList.contains('expanded')) {
+    e.stopPropagation();
+    expandSidebar();
+  }
+});
+
+// ── Modal helpers ─────────────────────────────────────────────
+// 點擊背景不關閉的 modal（編輯中，避免內容意外消失）
+const MODAL_NO_BACKDROP_CLOSE = new Set([
+  'modal-new-notebook',
+  'modal-rename-notebook',
+  'modal-edit',
+]);
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  setTimeout(() => { const inp = document.querySelector(`#${id} input, #${id} textarea`); if (inp) inp.focus(); }, 150);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => {
+    if (e.target !== bd) return;
+    if (MODAL_NO_BACKDROP_CLOSE.has(bd.id)) {
+      // 編輯類彈窗：點背景不關閉，給提示
+      showToast('請使用「取消」或「儲存」按鈕關閉');
+      return;
+    }
+    bd.classList.remove('open');
+  });
+});
+
+function showNewNotebookModal() { openModal('modal-new-notebook'); }
+function showNewItemModal() { createItemDirect(); }
+
+// ── Toast ─────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'show' + (isError ? ' error' : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.className = '', 2800);
+}
+
+// ── Utils ─────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── 啟動：深色模式偏好 & 顯示啟動碼遮罩 ──────────────────────
+if (localStorage.getItem('darkMode') === '1') {
+  document.body.classList.add('dark');
+}
+
+// 頁面載入後顯示啟動碼輸入框（不自動 init，等驗證通過後才執行）
+window.addEventListener('load', () => {
+  // loading 先隱藏（等驗證後才顯示）
+  document.getElementById('loading').classList.add('hidden');
+  // 聚焦啟動碼輸入框
+  setTimeout(() => document.getElementById('start-code-input').focus(), 100);
+});
+</script>
+</body>
+</html>
