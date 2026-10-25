@@ -810,7 +810,7 @@ body.dark #start-overlay { background: #0e0e0c; }
         onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-3)'">&#xff0b;</button>
     </div>
     <div id="item-list"></div>
-    <div style="padding:8px 0 10px;text-align:center;font-size:10px;color:var(--ink-4);letter-spacing:0.04em;flex-shrink:0;user-select:none;">v 26.05.02</div>
+    <div style="padding:8px 0 10px;text-align:center;font-size:10px;color:var(--ink-4);letter-spacing:0.04em;flex-shrink:0;user-select:none;">v 26.09.22 · Supabase</div>
   </div>
 
   <!-- Mobile panel overlay -->
@@ -881,18 +881,15 @@ body.dark #start-overlay { background: #0e0e0c; }
   <div class="modal">
     <h3>⚙ 設定</h3>
     <div class="form-group">
-      <label>主試算表 ID</label>
-      <input type="text" id="cfg-sheet-id" placeholder="Google 試算表 ID">
-    </div>
-    <div class="form-group">
-      <label>加密密碼（留空表示不更改）</label>
+      <label>加密密碼</label>
       <input type="password" id="cfg-password" placeholder="設定後無法更換，請謹慎">
+      <div class="hint" id="cfg-password-hint">尚未設定加密密碼</div>
     </div>
     <hr class="modal-divider">
     <div class="form-group">
       <label>啟動碼（留空表示不更改）</label>
       <input type="password" id="cfg-start-code" placeholder="預設為 1234">
-      <div class="hint">啟動碼用於開啟網頁時的身份驗證，存於雲端設定</div>
+      <div class="hint">啟動碼用於開啟網頁時的身份驗證，存於 Supabase</div>
     </div>
     <hr class="modal-divider">
     <div class="toggle-row">
@@ -987,10 +984,21 @@ body.dark #start-overlay { background: #0e0e0c; }
   </div>
 </div>
 
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
 <script>
+// ══════════════════════════════════════════════════════════
+// ── Supabase 連線設定 — 請填入你自己專案的值 ──────────────
+// ══════════════════════════════════════════════════════════
+const SUPABASE_URL      = 'https://bglcnlsuyydeqsnasfwn.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'sb_publishable_gjCwFmH9pww-oa3GqZKLuw_LDNa0qba';
+const IMAGE_BUCKET      = 'notebook-images';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // ── State ───────────────────────────────────────────────────
 const S = {
-  apiUrl         : 'https://script.google.com/macros/s/AKfycbwPToRzEYSwY6ppOzOueI2CkKw6N2buDHMknXc7vOLnVA7llKn0xY10ni9ULi15OSHe/exec',
   notebooks      : [],
   currentNb      : null,
   items          : [],
@@ -998,15 +1006,193 @@ const S = {
   sessionPwd     : '',
   pendingImage   : null,
   currentImageUrl: '',
-  currentFileId  : '',
+  currentImagePath: '',
 };
 
-// ── API ─────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// ── api(): 統一的資料存取入口（取代原本呼叫 Apps Script 的 fetch）
+//   保留跟原本一樣的 action 名稱與參數/回傳格式，
+//   讓下面所有呼叫端 (selectItem/loadItems/... ) 幾乎不用改。
+//   sheetId  ↔ notebooks.id
+//   rowIndex ↔ items.id
+// ══════════════════════════════════════════════════════════
 async function api(action, payload = {}) {
-  const res = await fetch(S.apiUrl, { method: 'POST', body: JSON.stringify({ action, payload }) });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error || '操作失敗');
-  return data;
+  switch (action) {
+
+    // ── 啟動碼 ──────────────────────────────────────────
+    case 'verifyStartCode': {
+      const { data, error } = await sb.rpc('verify_start_code', { code: payload.code });
+      if (error) throw new Error(error.message);
+      return { success: true, valid: !!data };
+    }
+    case 'saveStartCode': {
+      const { error } = await sb.rpc('set_start_code', { new_code: payload.startCode });
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+
+    // ── 設定 / 密碼 ───────────────────────────────────────
+    case 'getConfig': {
+      const { data, error } = await sb.rpc('has_password');
+      if (error) throw new Error(error.message);
+      return { success: true, hasPassword: !!data };
+    }
+    case 'saveConfig': {
+      if (payload.password) {
+        const { data, error } = await sb.rpc('set_password', { pwd: payload.password });
+        if (error) throw new Error(error.message);
+        if (!data) throw new Error('加密密碼已設定過，無法更改');
+      }
+      return { success: true };
+    }
+
+    // ── 記事本 ────────────────────────────────────────────
+    case 'listNotebooks': {
+      const { data, error } = await sb.from('notebooks').select('*').order('sort_order');
+      if (error) throw new Error(error.message);
+      return { success: true, notebooks: data.map(n => ({ sheetId: n.id, name: n.name, encrypted: n.encrypted, index: n.sort_order })) };
+    }
+    case 'createNotebook': {
+      const maxOrder = S.notebooks.reduce((m, n) => Math.max(m, n.index), -1);
+      const { data, error } = await sb.from('notebooks')
+        .insert({ name: payload.name, encrypted: !!payload.encrypted, sort_order: maxOrder + 1 })
+        .select().single();
+      if (error) throw new Error(error.message);
+      return { success: true, sheetId: data.id, name: data.name };
+    }
+    case 'renameNotebook': {
+      const { error } = await sb.from('notebooks').update({ name: payload.newName }).eq('id', payload.sheetId);
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+    case 'deleteNotebook': {
+      const { error } = await sb.from('notebooks').delete().eq('id', payload.sheetId);
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+    case 'reorderNotebooks': {
+      const ids = payload.orderedSheetIds;
+      for (let i = 0; i < ids.length; i++) {
+        const { error } = await sb.from('notebooks').update({ sort_order: i }).eq('id', ids[i]);
+        if (error) throw new Error(error.message);
+      }
+      return { success: true };
+    }
+
+    // ── 記事項目 ──────────────────────────────────────────
+    case 'listItems': {
+      const { data, error } = await sb.from('items')
+        .select('id, seq, name, image_path')
+        .eq('notebook_id', payload.sheetId)
+        .order('seq');
+      if (error) throw new Error(error.message);
+      const nb = S.notebooks.find(n => n.sheetId === payload.sheetId);
+      return {
+        success: true,
+        items: data.map(i => ({
+          seq: i.seq, name: i.name, encrypted: !!nb?.encrypted,
+          hasImage: !!i.image_path, rowIndex: i.id,
+        })),
+      };
+    }
+    case 'createItem': {
+      const items = await sb.from('items').select('seq').eq('notebook_id', payload.sheetId);
+      const maxSeq = (items.data || []).reduce((m, i) => Math.max(m, i.seq), -1);
+      const { data, error } = await sb.from('items')
+        .insert({ notebook_id: payload.sheetId, name: payload.name || '新記事', seq: maxSeq + 1 })
+        .select().single();
+      if (error) throw new Error(error.message);
+      return { success: true, rowIndex: data.id, seq: data.seq, name: data.name };
+    }
+    case 'getItem': {
+      const { data, error } = await sb.rpc('get_item_decrypted', {
+        p_item_id: payload.rowIndex,
+        pwd: payload.password || null,
+      });
+      if (error) {
+        if (error.message.includes('NEED_PASSWORD'))   throw new Error('NEED_PASSWORD');
+        if (error.message.includes('WRONG_PASSWORD'))  throw new Error('WRONG_PASSWORD');
+        throw new Error(error.message);
+      }
+      const row = data && data[0];
+      if (!row) throw new Error('項目不存在');
+      const nb = S.notebooks.find(n => n.sheetId === S.currentNb.sheetId);
+      return {
+        success: true, seq: row.seq, name: row.name, encrypted: !!nb?.encrypted,
+        content: row.content, imageUrl: row.image_path ? publicImageUrl(row.image_path) : '',
+        imagePath: row.image_path || '', rowIndex: row.id,
+      };
+    }
+    case 'saveItem': {
+      const { error } = await sb.rpc('save_item_content', {
+        p_item_id: payload.rowIndex, new_content: payload.content, pwd: payload.password || null,
+      });
+      if (error) {
+        if (error.message.includes('WRONG_PASSWORD')) throw new Error('WRONG_PASSWORD');
+        throw new Error(error.message);
+      }
+      if (payload.imagePath !== undefined) {
+        const { error: e2 } = await sb.from('items').update({ image_path: payload.imagePath }).eq('id', payload.rowIndex);
+        if (e2) throw new Error(e2.message);
+      }
+      return { success: true };
+    }
+    case 'renameItem': {
+      const { error } = await sb.from('items').update({ name: payload.newName }).eq('id', payload.rowIndex);
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+    case 'deleteItem': {
+      const { error } = await sb.from('items').delete().eq('id', payload.rowIndex);
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+    case 'reorderItems': {
+      const idxs = payload.orderedRowIndexes;
+      for (let i = 0; i < idxs.length; i++) {
+        const { error } = await sb.from('items').update({ seq: i }).eq('id', idxs[i]);
+        if (error) throw new Error(error.message);
+      }
+      return { success: true };
+    }
+
+    // ── 加解密 ────────────────────────────────────────────
+    case 'unlockNotebook': {
+      const { data, error } = await sb.rpc('verify_password', { pwd: payload.password });
+      if (error) throw new Error(error.message);
+      if (!data) throw new Error('密碼錯誤');
+      return { success: true };
+    }
+
+    // ── 圖片 ──────────────────────────────────────────────
+    case 'uploadImage': {
+      const bytes = base64ToBytes(payload.base64Data);
+      const path  = `${Date.now()}_${payload.fileName}`.replace(/\s+/g, '_');
+      const { error } = await sb.storage.from(IMAGE_BUCKET).upload(path, bytes, { contentType: payload.mimeType });
+      if (error) throw new Error(error.message);
+      return { success: true, imageUrl: publicImageUrl(path), fileId: path };
+    }
+    case 'deleteImage': {
+      const { error } = await sb.storage.from(IMAGE_BUCKET).remove([payload.fileId]);
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+
+    default:
+      throw new Error(`未知的 action: ${action}`);
+  }
+}
+
+function publicImageUrl(path) {
+  const { data } = sb.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+  return data?.publicUrl || '';
+}
+
+function base64ToBytes(base64) {
+  const binStr = atob(base64);
+  const bytes  = new Uint8Array(binStr.length);
+  for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+  return bytes;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1025,11 +1211,8 @@ async function verifyStartCode() {
   errEl.textContent = '';
 
   try {
-    // 從 Apps Script 取得啟動碼進行比對
-    const data = await api('getStartCode');
-    const correct = String(data.startCode || '1234');
-    if (entered === correct) {
-      // 驗證成功：隱藏遮罩，開始載入
+    const data = await api('verifyStartCode', { code: entered });
+    if (data.valid) {
       document.getElementById('start-overlay').classList.add('hidden');
       await initApp();
     } else {
@@ -1048,7 +1231,7 @@ async function verifyStartCode() {
 // ── Init ────────────────────────────────────────────────────
 async function initApp() {
   document.getElementById('loading').classList.remove('hidden');
-  try { await loadNotebooks(); } catch(e) { showToast('無法連線，請確認設定', true); }
+  try { await loadNotebooks(); } catch(e) { showToast('無法連線，請確認 Supabase 設定', true); }
   hideLoading();
 }
 
@@ -1252,7 +1435,7 @@ async function selectItem(item) {
     });
     S.currentItem      = data;
     S.currentImageUrl  = data.imageUrl || '';
-    S.currentFileId    = '';
+    S.currentImagePath = data.imagePath || '';
     S.pendingImage     = null;
     renderItems(S.items);
     showViewContent(data);
@@ -1367,7 +1550,7 @@ async function saveCurrentItem() {
   if (!S.currentItem) return;
   const newName  = document.getElementById('edit-item-name').value.trim();
   const content  = document.getElementById('edit-textarea').value;
-  let   imageUrl = S.currentImageUrl;
+  let   imagePath = S.currentImagePath;
 
   if (newName && newName !== S.currentItem.name) {
     try {
@@ -1384,23 +1567,23 @@ async function saveCurrentItem() {
         mimeType  : S.pendingImage.mimeType,
         base64Data: S.pendingImage.base64,
       });
-      imageUrl          = res.imageUrl;
-      S.currentImageUrl = res.imageUrl;
-      S.currentFileId   = res.fileId;
-      S.pendingImage    = null;
+      S.currentImageUrl  = res.imageUrl;
+      S.currentImagePath = res.fileId;
+      imagePath           = res.fileId;
+      S.pendingImage      = null;
     } catch(e) { showToast('圖片上傳失敗：' + e.message, true); document.getElementById('edit-save-meta').textContent = ''; return; }
   }
 
   try {
     await api('saveItem', {
-      sheetId  : S.currentNb.sheetId,
-      rowIndex : S.currentItem.rowIndex,
+      sheetId   : S.currentNb.sheetId,
+      rowIndex  : S.currentItem.rowIndex,
       content,
-      imageUrl,
-      password : S.sessionPwd || undefined,
+      imagePath,
+      password  : S.sessionPwd || undefined,
     });
     S.currentItem.content  = content;
-    S.currentItem.imageUrl = imageUrl;
+    S.currentItem.imageUrl = S.currentImageUrl;
     document.getElementById('view-title').textContent = S.currentItem.name;
     closeModal('modal-edit');
     showViewContent(S.currentItem);
@@ -1456,9 +1639,9 @@ function updateEditImageZone(url, isLocal = false) {
 
 async function removeEditImage(e) {
   e.stopPropagation();
-  if (S.currentFileId) {
-    try { await api('deleteImage', { fileId: S.currentFileId }); } catch(_) {}
-    S.currentFileId = '';
+  if (S.currentImagePath) {
+    try { await api('deleteImage', { fileId: S.currentImagePath }); } catch(_) {}
+    S.currentImagePath = '';
   }
   S.currentImageUrl = '';
   S.pendingImage    = null;
@@ -1497,13 +1680,22 @@ function confirmDeleteItem() {
 
 // ── Settings ─────────────────────────────────────────────────
 function showSettingsModal() {
-  document.getElementById('cfg-sheet-id').value    = '';
   document.getElementById('cfg-password').value    = '';
   document.getElementById('cfg-start-code').value  = '';
   document.getElementById('cfg-darkmode').checked  = document.body.classList.contains('dark');
   openModal('modal-settings');
   api('getConfig').then(d => {
-    document.getElementById('cfg-sheet-id').value = d.mainSpreadsheetId || '';
+    const hint = document.getElementById('cfg-password-hint');
+    const pwdInput = document.getElementById('cfg-password');
+    if (d.hasPassword) {
+      hint.textContent = '已設定過加密密碼，無法更改';
+      pwdInput.disabled = true;
+      pwdInput.placeholder = '（已設定）';
+    } else {
+      hint.textContent = '尚未設定加密密碼';
+      pwdInput.disabled = false;
+      pwdInput.placeholder = '設定後無法更換，請謹慎';
+    }
   }).catch(() => {});
 }
 
@@ -1513,24 +1705,18 @@ function toggleDark(on) {
 }
 
 async function saveSettings() {
-  const sheetId   = document.getElementById('cfg-sheet-id').value.trim();
   const password  = document.getElementById('cfg-password').value;
   const startCode = document.getElementById('cfg-start-code').value;
 
   try {
-    // 儲存主設定（sheet ID、密碼）
-    await api('saveConfig', { mainSpreadsheetId: sheetId, password: password || undefined });
-
-    // 若有填啟動碼，另外儲存
+    if (password) {
+      await api('saveConfig', { password });
+    }
     if (startCode) {
       await api('saveStartCode', { startCode });
     }
-
     closeModal('modal-settings');
     showToast('設定已儲存');
-    document.getElementById('loading').classList.remove('hidden');
-    await loadNotebooks();
-    hideLoading();
   } catch(e) { showToast(e.message, true); }
 }
 
